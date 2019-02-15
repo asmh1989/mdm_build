@@ -1,19 +1,14 @@
-/**
- * 打包请求参数解析
- * @author sun
- * @date 19-2-14 下午3:08
- **/
-
 import 'package:common_utils/common_utils.dart';
 
+/// 打包请求参数解析
 class BuildParams {
-  // 打包框架
+  /// 打包框架
   String framework;
 
-  // 应用信息
+  /// 应用信息
   AppInfo app_info;
 
-  // 应用配置
+  /// 应用配置
   Map<String, dynamic> app_config;
 
   BuildParams({
@@ -36,35 +31,35 @@ class BuildParams {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['framework'] = this.framework;
     data['app_config'] = this.app_config;
-    data['app_info'] = this.app_info.toJson();
+    data['app_info'] = this.app_info?.toJson();
     return data;
   }
 
 }
 
 class AppInfo {
-  // 项目名称
+  /// 项目名称
   String project_name;
 
-  // 仓库地址
+  /// 仓库地址
   String source_url;
 
-  // svn版本号
+  /// svn版本号
   int svn_version;
 
-  // 应用版本名称
+  /// 应用版本名称
   String version_name;
 
-  // 应用版本号
+  /// 应用版本号
   int version_code;
 
-  // 应用名称
+  /// 应用名称
   String app_name;
 
-  // 应用名称
+  /// 应用名称
   String app_icon;
 
-  // meta-data参数配置
+  /// meta-data参数配置
   Map<String, String> meta;
 
 

@@ -12,6 +12,10 @@ dependencies:
   shelf: ^0.7.2
   common_utils: ^1.0.9
   mongo_dart: ^0.3.4
+  uuid: ^1.0.3
+  dio: ^2.0.4
+  image: 2.0.7
+  shell: 1.0.1
 
 dev_dependencies:
   pedantic: ^1.0.0
