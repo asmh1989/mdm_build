@@ -18,11 +18,11 @@ class Utils {
 
   static Future<void> download(String url, String path) async {
     try {
-      print('start download... $url to $path');
+      log('start download... $url to $path');
       await _dio.download(url, path);
-      print('$url downloaded');
+      log('$url downloaded');
     } catch (e){
-      print(e);
+      log(e);
       throw new Exception('${url} 下载失败');
     }
   }
@@ -30,16 +30,16 @@ class Utils {
   static Future<void> clone({String url, String branch, String path,  String name}) async {
 
     try{
-      print('start git clone ... $url to $path');
+      log('start git clone ... $url to $path');
 
       var shell = new Shell(workingDirectory: path);
 
       var result = await shell.run('git', ['clone', url, '-b', branch, name]);
 
-      print('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
+      log('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
 
     } catch (e) {
-      print(e);
+      log(e);
       throw new Exception('${url} git clone 失败');
     }
 
@@ -51,5 +51,9 @@ class Utils {
 
   static String error(Map res){
     return json.encode({'error': res});
+  }
+
+  static void log(String msg){
+    print('${DateTime.now().toIso8601String()} $msg');
   }
 }

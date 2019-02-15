@@ -22,6 +22,8 @@ class BuildStatus {
     return data;
   }
 
+  static BuildStatus newFailed(String msg) => new BuildStatus(code:1, msg: msg);
+
   static BuildStatus get SUCCESS => new BuildStatus(code:0, msg: '打包成功');
   static BuildStatus get FAILED => new BuildStatus(code:1, msg: '打包失败');
   static BuildStatus get WAITING => new BuildStatus(code:2, msg: '等待中');
@@ -50,13 +52,16 @@ class BuildModel {
   });
 
   BuildModel.fromJson(Map<String, dynamic> json) {
-    if(json['date'] == null){
-      date = json['date'];
+    date = json['date'];
+    if(date == null){
+        date = DateTime.now();
     }
     build_id = json['build_id'];
     var info = json['status'];
     if(info != null){
       status = BuildStatus.fromJson(info);
+    } else {
+      status = BuildStatus.INIT;
     }
 
     info = BuildParams.fromJson(json[params]);

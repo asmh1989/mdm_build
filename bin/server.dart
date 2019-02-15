@@ -57,11 +57,11 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
         String key = await Build.start(params);
 
-        print('body : ${json.encode(params.toJson())}');
+        Utils.log('body : ${json.encode(params.toJson())}');
         return shelf.Response.ok(Utils.ok({'id': key}));
       }
     } catch (e){
-      print(e);
+      Utils.log(e);
       return shelf.Response.ok(Utils.error({'msg':e.toString()}));
     }
     return shelf.Response.forbidden('forbidden for "${request.url}"');

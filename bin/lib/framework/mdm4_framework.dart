@@ -15,30 +15,29 @@ class MDM4Framework implements BaseFramework {
   }
 
   @override
-  FutureOr<String> build(BuildParams params) async{
-    String key = Utils.newKey();
+  FutureOr<void> build(BuildModel model) async{
+    BuildParams params = model.params;
 
-    String appPath = '${Utils.cachePath}/${key}';
-
-    Directory dir = new Directory(appPath);
-    if(dir.existsSync()){
-      dir.deleteSync();
-    }
-
-    dir.createSync(recursive: true);
+    String appPath = '${Utils.cachePath}/${model.build_id}';
 
     String appIcon = '${appPath}/appicon.png';
     String gitSrc = 'template-mdm';
     String templatePath = '$appPath/$gitSrc';
 
-    if(params.app_info.app_icon.isNotEmpty){
-      await Utils.download(params.app_info.app_icon, appIcon);
+    try {
+      if (params.app_info.app_icon.isNotEmpty) {
+        await Utils.download(params.app_info.app_icon, appIcon);
+      }
+
+      await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
+          path: appPath,
+          branch: getName(),
+          name: gitSrc);
+
+
+    } catch(e){
+      model.status = BuildStatus.newFailed(e.toString());
+      await DBManager.save(Constant.TABLE_BUILD, 'build_id', model.toJson());
     }
-
-    await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git', path: appPath, branch: getName(), name: gitSrc);
-
-    await DBManager.save(Constant.TABLE_BUILD, 'build_id', new BuildModel(build_id: key, params: params).toJson());
-
-    return key;
   }
 }
