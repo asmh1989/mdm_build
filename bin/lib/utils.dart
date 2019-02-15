@@ -37,12 +37,41 @@ class Utils {
       var result = await shell.run('git', ['clone', url, '-b', branch, name]);
 
       log('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
-
+      if(result.exitCode != 0){
+        throw new Exception('');
+      }
     } catch (e) {
       log(e);
       throw new Exception('${url} git clone 失败');
     }
 
+  }
+
+  static Future svnCheckout({String url, int version, String path}) async {
+    try{
+      log('start svn co  ... $url:$version to $path');
+
+      var shell = new Shell(workingDirectory: path);
+
+      String command = 'co $url $path --username sunmh --password Justsy123 --no-auth-cache --non-interactive';
+
+      if(version != null){
+        command += ' -r $version';
+      }
+
+      List<String> commands = command.split(' ');
+
+      var result = await shell.run('svn', commands);
+
+      log('svn co ${url}, done  ${result.exitCode}, ${result.stderr}');
+
+      if(result.exitCode != 0){
+        throw new Exception('');
+      }
+    } catch (e) {
+      log(e);
+      throw new Exception('${url} svn checkout 失败');
+    }
   }
 
   static String ok(Map res){

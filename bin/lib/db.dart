@@ -32,4 +32,18 @@ class DBManager {
       await coll.insert(updateDate(data));
     }
   }
+
+  static Future<Stream<Map<String, dynamic>>> find(String collection, [selector]) async {
+    await connect();
+    var coll = _db.collection(collection);
+
+    return await coll.find(selector);
+  }
+
+  static Future<int> count(String collection, [selector]) async {
+    await connect();
+    var coll = _db.collection(collection);
+    return coll.count(selector);
+  }
+
 }
