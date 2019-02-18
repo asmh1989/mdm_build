@@ -29,6 +29,8 @@ class BuildModel {
 
   String local_url='';
 
+  String local_path='';
+
   BuildParams params;
 
 
@@ -53,7 +55,7 @@ class BuildModel {
 
     info = BuildParams.fromJson(json[params]);
     local_url  = json['local_url'];
-
+    local_path = json['local_path'];
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +67,7 @@ class BuildModel {
 
     data['local_url'] = this.local_url;
     data['params'] = this.params?.toJson();
+    data['local_path'] = this.local_path;
     return data;
   }
 }

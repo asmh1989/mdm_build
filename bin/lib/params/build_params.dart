@@ -92,7 +92,7 @@ class AppInfo {
       throw new Exception('app_icon 类型错误');
     }
 
-    meta = json['meta']?.cast<String, String>();
+    meta = (json['meta']??{})?.cast<String, String>();
   }
 
   Map<String, dynamic> toJson() {

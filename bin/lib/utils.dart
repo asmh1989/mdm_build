@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, Directory;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
@@ -14,6 +14,28 @@ class Utils {
 
   static String newKey(){
     return _uuid.v1();
+  }
+
+  static String packagePath(String build_id){
+    if(!Directory('$cachePath/packages').existsSync()){
+      Directory('$cachePath/packages').createSync(recursive: true);
+    }
+    return '$cachePath/packages/$build_id.apk';
+  }
+
+  static String logPath(String build_id){
+    if(!Directory('$cachePath/logs').existsSync()){
+      Directory('$cachePath/logs').createSync(recursive: true);
+    }
+    return '$cachePath/logs/$build_id.log';
+  }
+
+  static String appPath(String build_id){
+    Directory dir = Directory('$cachePath/apps/$build_id');
+    if(!dir.existsSync()){
+      dir.createSync(recursive: true);
+    }
+    return dir.path;
   }
 
   static Future<void> download(String url, String path) async {
@@ -85,4 +107,5 @@ class Utils {
   static void log(String msg){
     print('${DateTime.now().toIso8601String()} $msg');
   }
+
 }

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import '../params/build_params.dart';
 import 'base.dart';
 import '../utils.dart';
 import '../db.dart';
@@ -8,6 +7,80 @@ import '../constant.dart';
 import '../model/build_model.dart';
 import 'package:shell/shell.dart';
 import 'create_icon.dart';
+import 'package:xml/xml.dart';
+import '../shell.dart';
+
+class UpdateAndroidManifest extends XmlTransformer {
+
+  Map<String, String> meta;
+
+  Map<String, String> attrs;
+
+  String version_code;
+  String version_name;
+
+  UpdateAndroidManifest({this.meta, this.attrs, this.version_name, this.version_code});
+
+  @override
+  XmlElement visitElement(XmlElement node) {
+    if (node.name.qualified == 'application') {
+
+      if(meta.isNotEmpty) {
+        node.children.removeWhere((XmlNode e) {
+          if (e.text == 'meta-data') {
+            for (var attr in e.attributes) {
+              if (meta[attr.name.qualified] != null){
+                return true;
+              }
+            }
+          }
+          return false;
+        });
+
+        for(var key in meta.keys){
+          var build = new XmlElement(XmlName.fromString('meta-data'));
+          build.attributes.add(new XmlAttribute(XmlName.fromString('android:name'), key));
+          build.attributes.add(new XmlAttribute(XmlName.fromString('android:value'), meta[key]));
+
+          node.children.add(build);
+        }
+
+      }
+
+      if(attrs.isNotEmpty){
+        for(var key in attrs.keys){
+          node.attributes.removeWhere((XmlAttribute attr) =>
+          attr.name.qualified == key);
+          node.attributes.add(
+              new XmlAttribute(XmlName(key), attrs[key]));
+        }
+
+      }
+
+      return new XmlElement(
+          visit(node.name), node.attributes.map(visit),
+          node.children.map(visit));
+    } else if (node.name.qualified == 'manifest') {
+      if (version_name != null) {
+        node.attributes.removeWhere((XmlAttribute attr) =>
+        attr.name.qualified == 'android:versionName');
+        node.attributes.add(
+            new XmlAttribute(XmlName('android:versionName'), version_name));
+      }
+
+      if (version_code != null) {
+        node.attributes.removeWhere((XmlAttribute attr) =>
+        attr.name.qualified == 'android:versionCode');
+        node.attributes.add(
+            new XmlAttribute(XmlName('android:versionCode'), version_code));
+      }
+
+      return new XmlElement(visit(node.name), node.attributes.map(visit),
+          node.children.map(visit));
+    }
+    return super.visitElement(node);
+  }
+}
 
 class MDM4Framework implements BaseFramework {
 
@@ -54,34 +127,149 @@ class MDM4Framework implements BaseFramework {
     }
   }
 
+  void changeConfig(BuildModel model, String source) async {
+    var tmpSrc = getTmpSrc(source);
+    Shell2 shell = new Shell2(env: {'LANGUAGE':'en_us'});
+
+    var app = model.params.app_info;
+    String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
+    final file = new File(manifestFilePath);
+    if(file.existsSync()){
+      var svn_version = model.params.app_info.svn_version;
+      if(svn_version == null){
+        var result = await shell.run("svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
+        svn_version =  int.parse(result.stdout.toString().trim());
+      }
+
+      Utils.log('svn_version = $svn_version');
+
+      var meta = app.meta;
+      Map<String, String> attrs = new Map();
+
+      if(app.app_name != null && app.app_name.isNotEmpty){
+        attrs['android:label'] = app.app_name;
+      }
+
+      if(app.app_icon!= null && app.app_icon.isNotEmpty){
+        attrs['android:icon'] = '@drawable/auto_build_icon';
+      }
+
+      meta['svn-version'] = '$svn_version';
+
+      var doc =  parse(await file.readAsString());
+
+      var update = new UpdateAndroidManifest(meta: meta, attrs: attrs, version_code: '${app.version_code}', version_name: app.version_name).visit(doc);
+
+      await file.writeAsString(update.toString());
+
+      final propertiesFile = source + '/app/src/main/assets/config.properties';
+
+      /// 修改properties配置
+      if(new File(propertiesFile).existsSync()){
+        for(var key in model.params.app_config.keys){
+          ProcessResult find = await shell.run('cat $propertiesFile | grep ^$key=');
+          if(find.exitCode == 0){
+            await shell.run('sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
+          } else {
+            await shell.run('echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
+          }
+        }
+      } else {
+        Utils.log('$propertiesFile is not exist');
+      }
+
+    } else {
+      throw new Exception('$source 中未发现AndroidManifest.xml文件');
+    }
+
+
+  }
+
+  Future<void> realBuild(BuildModel model, String source) async {
+    var logPath = Utils.logPath(model.build_id);
+
+    var HOME = Platform.environment['HOME'];
+
+    Shell2 shell = new Shell2(workDir: source, env: {
+      'ANDROID_HOME':'$HOME/Android/Sdk',
+      'ZKM_JAR':'$HOME/bin/ZKM.jar',
+      'JAVA_HOME':'/usr/lib/jvm/java-8-openjdk-amd64'
+    });
+    Utils.log('-----------------${model.build_id} 开始打包---------------------');
+    ProcessResult result = await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
+    result = await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
+    Utils.log('-----------------${model.build_id} 打包结束---------------------');
+
+    if (result.exitCode != 0) {
+      throw new Exception('编译失败, ${result.stderr}');
+    }
+
+  }
+
+  void afterBuild(BuildModel model, String source) async {
+    var savePath = Utils.packagePath(model.build_id);
+    var releasePackage = '$source/app/build/outputs/apk/app-release.apk';
+    if(!File(releasePackage).existsSync()){
+      releasePackage = '$source/app/build/outputs/apk/release/app-release.apk';
+      if(!File(releasePackage).existsSync()){
+        throw new Exception('apk 包不见了');
+      }
+    }
+
+    Shell shell = new Shell();
+    await shell.run('cp', [releasePackage, savePath]);
+
+    if(File('$source/resign.sh').existsSync()){
+      Utils.log('发现重新签名脚步...');
+      shell.navigate(source);
+      var result = await shell.run('sh', ['$source/resign.sh']);
+      if(result.exitCode != 0) {
+        throw new Exception('重新签名失败');
+      }
+    }
+
+  }
+
   @override
   FutureOr<void> build(BuildModel model) async{
-    BuildParams params = model.params;
-
-    String appPath = '${Utils.cachePath}/${model.build_id}';
+    String appPath = Utils.appPath(model.build_id);
 
     String gitSrc = 'template-mdm';
-    String templatePath = '/home/sun/.mdm_build/b5b84460-0b50-11e9-9947-b7139caa41b8/template-mdm';//'$appPath/$gitSrc';
+    String templatePath = '$appPath/$gitSrc';
+    b() async {
 
-    try {
+//      /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
+//      await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
+//          path: appPath,
+//          branch: getName(),
+//          name: gitSrc);
+//
+//      /// 准备工作, 下载实际的svn代码, 并把需要的代码合并到模板工程中
+//      await prepare(model, templatePath);
+//
+//      ///  修改app icon
+//      await changeRes(model, appPath, templatePath);
+//
+//      /// 修改配置
+//      await changeConfig(model, templatePath);
 
-      /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
-      await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
-          path: appPath,
-          branch: getName(),
-          name: gitSrc);
+      /// 开始编译
+      await realBuild(model, '/home/sun/.mdm_build/apps/4f439690-3260-11e9-eab2-43979b83c173/template-mdm/');
 
-      /// 准备工作, 下载实际的svn代码, 并把需要的代码合并到模板工程中
-      await prepare(model, templatePath);
+      /// 编译后处理
+      await afterBuild(model, templatePath);
 
-      ///  修改app icon
-      await changeRes(model, appPath, templatePath);
+      model.status = BuildStatus.SUCCESS;
+      await DBManager.save(Constant.TABLE_BUILD, 'build_id', model.toJson());
+      Utils.log('${model.build_id}, 打包结束.....');
+    }
 
-      /// 修改配置
-
-    } catch(e){
+    runZoned((){
+      b();
+    }, onError: (e) async {
+      Utils.log(e.toString());
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.TABLE_BUILD, 'build_id', model.toJson());
-    }
+    });
   }
 }
