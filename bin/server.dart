@@ -12,6 +12,7 @@ import 'lib/db.dart';
 import 'lib/build.dart';
 import 'lib/utils.dart';
 
+
 main(List<String> args) async {
   var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '8080');
 
@@ -38,16 +39,36 @@ main(List<String> args) async {
       .addHandler(_echoRequest);
 
   var server = await io.serve(handler, 'localhost', port);
-  print('Serving at http://${server.address.host}:${server.port}');
+  Utils.log('Serving at http://${server.address.host}:${server.port}');
 }
 
 
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
   if(request.method == 'GET'){
+    if(request.url.path =='app/query'){
+      Map<String, dynamic> querys = {};
 
+      try{
+        if(request.url.query != null){
+          var list = request.url.query.split('&');
+          for(var d in list){
+            if(d.contains('=')){
+              var l = d.split('=');
+              querys[l[0]] = int.parse(l[1]);
+            }
+          }
+        }
+      } catch (e){
+        return shelf.Response.ok('参数错误');
+      }
 
-    return shelf.Response.ok('Request for "${request.url}" --- ');
+      var data = await Build.getBuilds(status: querys['status'], page: querys['page'], pageSize: querys['pageSize']);
+
+      return shelf.Response.ok(Utils.ok({'data': data}));
+    }  else {
+      return shelf.Response.forbidden('forbidden for "${request.url}"');
+    }
   } else if(request.method == 'POST'){
     try {
       Map body = json.decode(await request.readAsString());

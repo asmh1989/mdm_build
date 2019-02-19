@@ -74,7 +74,7 @@ class Build {
     }
     await initConfig();
 
-    new Timer.periodic(new Duration(seconds: 30), (Timer t)=> _doTimerWork());
+    new Timer.periodic(new Duration(seconds: 60), (Timer t)=> _doTimerWork());
 
     new Timer(Duration(seconds: 2), () => _doTimerWork());
 
@@ -130,4 +130,29 @@ class Build {
     return key;
   }
 
+  static Future<List<Map>> getBuilds({
+    int status,
+    int page = 0,
+    int pageSize = 20
+  }) async{
+
+    if(page == null) page = 0;
+    if(pageSize == null) pageSize = 20;
+
+    if(pageSize < 1) pageSize = 1;
+
+    var mm = where.skip(page * pageSize).limit(pageSize);
+    if(status != null){
+      mm.eq(PROP_CODE, status);
+    }
+    var data = await DBManager.find(Constant.TABLE_BUILD, mm);
+
+    List<Map> list = [];
+    for(var d in await data.toList()){
+      list.add(BuildModel.fromJson(d).toJson());
+    }
+
+    return list;
+
+  }
 }

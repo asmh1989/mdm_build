@@ -99,12 +99,19 @@ class Utils {
     }
   }
 
+  static dynamic myEncode(dynamic item) {
+    if(item is DateTime) {
+      return item.toIso8601String();
+    }
+    return item;
+  }
+
   static String ok(Map res){
-    return json.encode({'ok': res});
+    return json.encode({'ok': res}, toEncodable: myEncode);
   }
 
   static String error(Map res){
-    return json.encode({'error': res});
+    return json.encode({'error': res}, toEncodable: myEncode);
   }
 
   static void log(String msg){
