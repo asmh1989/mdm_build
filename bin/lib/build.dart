@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:mongo_dart/mongo_dart.dart' ;
 
 import 'framework/base.dart';
@@ -12,6 +14,44 @@ import 'model/config_model.dart';
 import 'utils.dart';
 import 'constant.dart';
 import 'db.dart';
+
+void _doTimerWork()  async {
+  Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
+  await Build.initConfig();
+  while(true) {
+    int buildings = await DBManager.count(Constant.TABLE_BUILD,
+        where.eq(PROP_CODE, BuildStatus.BUILDING.code));
+    if (buildings < env_config.max_build) {
+      var data = await DBManager.findOne(Constant.TABLE_BUILD,
+          where.eq(PROP_CODE, BuildStatus.WAITING.code));
+
+      if(data != null && data.isNotEmpty){
+        BuildModel model = BuildModel.fromJson(data);
+        await Build._build(model);
+      } else {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+
+  var builds = await DBManager.find(Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
+  for(var data in await builds.toList()){
+    BuildModel model = BuildModel.fromJson(data);
+
+    var now = DateTime.now().millisecondsSinceEpoch;
+    if(now -  model.date.millisecondsSinceEpoch> 20*60*1000){
+      Utils.log('发现异常的打包记录, ${model.build_id}, date: ${model.date.toIso8601String()}');
+      Directory app = new Directory(Utils.appPath(model.build_id));
+      if(app.existsSync()){
+        app.deleteSync(recursive: true);
+      }
+
+      await Build._build(model);
+    }
+  }
+}
 
 class Build {
 
@@ -34,6 +74,10 @@ class Build {
     }
     await initConfig();
 
+    new Timer.periodic(new Duration(seconds: 30), (Timer t)=> _doTimerWork());
+
+    new Timer(Duration(seconds: 2), () => _doTimerWork());
+
   }
 
   static Future<Map> initConfig([Map<String, dynamic> config]) async {
@@ -55,17 +99,20 @@ class Build {
     return  env_config.toJson();
   }
 
-  static void _build(BaseFramework framework, BuildModel model) async {
-    model.status = BuildStatus.BUILDING;
-    await DBManager.save(Constant.TABLE_BUILD, id:PROP_BUILD_ID, data:model.toJson());
-    framework.build(model);
+  static void _build(BuildModel model) async {
+    BaseFramework framework = _frameworks[model.params.framework];
+    if(framework == null){
+      model.status = BuildStatus.newFailed('不支持的 framework: ${model.params.framework}');
+      await DBManager.save(Constant.TABLE_BUILD, id:PROP_BUILD_ID, data:model.toJson());
+    } else {
+      model.status = BuildStatus.BUILDING;
+      await DBManager.save(Constant.TABLE_BUILD, id:PROP_BUILD_ID, data:model.toJson());
+      framework.build(model);
+    }
   }
 
   static Future<String> start(BuildParams params)  async {
-    BaseFramework framework = _frameworks[params.framework];
-    if(framework == null){
-      throw new Exception('不支持的 framework: ${params.framework}');
-    }
+
     String key = Utils.newKey();
 
     var model = new BuildModel(build_id: key, params: params);
@@ -75,7 +122,7 @@ class Build {
     int now_builds = await DBManager.count(Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
 
     if(now_builds < env_config.max_build){
-      _build(framework, model);
+      await _build(model);
     } else {
       Utils.log('$key need waiting... building: $now_builds, max_build:${env_config.max_build}');
     }

@@ -54,7 +54,7 @@ class BuildModel {
       status = BuildStatus.WAITING;
     }
 
-    info = BuildParams.fromJson(json[PROP_PARAMS]);
+    params = BuildParams.fromJson(json[PROP_PARAMS]??{});
   }
 
   Map<String, dynamic> toJson() {

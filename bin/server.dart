@@ -45,9 +45,10 @@ main(List<String> args) async {
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
   if(request.method == 'GET'){
+
+
     return shelf.Response.ok('Request for "${request.url}" --- ');
   } else if(request.method == 'POST'){
-
     try {
       Map body = json.decode(await request.readAsString());
 
