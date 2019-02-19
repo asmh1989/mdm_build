@@ -34,6 +34,7 @@ class ConfigModel {
   }
 
   void merge(ConfigModel update){
+    update.verify();
     if(update.max_build != null && update.max_build != max_build && update.max_build > 2){
       max_build = update.max_build;
     }
