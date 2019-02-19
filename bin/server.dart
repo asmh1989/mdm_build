@@ -60,7 +60,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
           }
         }
       } catch (e){
-        return shelf.Response.ok('参数错误');
+        return shelf.Response.ok(Utils.error({'msg': '参数错误'}));
       }
 
       var data = await Build.getBuilds(status: params['status'], page: params['page'], pageSize: params['pageSize']);
