@@ -155,4 +155,13 @@ class Build {
     return list;
 
   }
+
+  static Future getBuild(String id) async{
+    var data = await DBManager.findOne(Constant.TABLE_BUILD, where.eq(PROP_BUILD_ID, id));
+    if(data != null) {
+      return BuildModel.fromJson(data).toJson();
+    } else {
+      return null;
+    }
+  }
 }

@@ -47,7 +47,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
   if(request.method == 'GET'){
     if(request.url.path =='app/query'){
-      Map<String, dynamic> querys = {};
+      Map<String, dynamic> params = {};
 
       try{
         if(request.url.query != null){
@@ -55,7 +55,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
           for(var d in list){
             if(d.contains('=')){
               var l = d.split('=');
-              querys[l[0]] = int.parse(l[1]);
+              params[l[0]] = int.parse(l[1]);
             }
           }
         }
@@ -63,10 +63,19 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         return shelf.Response.ok('参数错误');
       }
 
-      var data = await Build.getBuilds(status: querys['status'], page: querys['page'], pageSize: querys['pageSize']);
+      var data = await Build.getBuilds(status: params['status'], page: params['page'], pageSize: params['pageSize']);
 
       return shelf.Response.ok(Utils.ok({'data': data}));
-    }  else {
+
+    } else if(request.url.path.startsWith('app/query/')){
+      var data = await Build.getBuild(request.url.path.split('/').last);
+      if(data != null){
+        return shelf.Response.ok(Utils.ok({'data': data}));
+      } else {
+        return shelf.Response.ok(Utils.error({'msg': '非法id'}));
+      }
+
+    } else {
       return shelf.Response.forbidden('forbidden for "${request.url}"');
     }
   } else if(request.method == 'POST'){
