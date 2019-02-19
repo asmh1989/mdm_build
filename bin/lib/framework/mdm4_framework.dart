@@ -84,6 +84,8 @@ class UpdateAndroidManifest extends XmlTransformer {
 
 class MDM4Framework implements BaseFramework {
 
+  String gitSrc = 'template-mdm';
+
   @override
   String getName() {
     return 'mdm_4';
@@ -91,6 +93,13 @@ class MDM4Framework implements BaseFramework {
 
   String getTmpSrc(source) {
     return '${source}/.gradle/project';
+  }
+
+  void preSource(BuildModel model, String appPath) async {
+    await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
+        path: appPath,
+        branch: getName(),
+        name: gitSrc);
   }
 
   void prepare(BuildModel model, String source) async {
@@ -188,13 +197,8 @@ class MDM4Framework implements BaseFramework {
   Future<void> realBuild(BuildModel model, String source) async {
     var logPath = Utils.logPath(model.build_id);
 
-    var HOME = Platform.environment['HOME'];
 
-    Shell2 shell = new Shell2(workDir: source, env: {
-      'ANDROID_HOME':'$HOME/Android/Sdk',
-      'ZKM_JAR':'$HOME/bin/ZKM.jar',
-      'JAVA_HOME':'/usr/lib/jvm/java-8-openjdk-amd64'
-    });
+    Shell2 shell = new Shell2(workDir: source);
     Utils.log('-----------------${model.build_id} 开始打包---------------------');
     ProcessResult result = await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
     result = await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
@@ -216,60 +220,57 @@ class MDM4Framework implements BaseFramework {
       }
     }
 
-    Shell shell = new Shell();
-    await shell.run('cp', [releasePackage, savePath]);
+    Shell2 shell = new Shell2(workDir: source);
 
     if(File('$source/resign.sh').existsSync()){
       Utils.log('发现重新签名脚步...');
-      shell.navigate(source);
-      var result = await shell.run('sh', ['$source/resign.sh']);
+      var result = await shell.run('sh $source/resign.sh');
       if(result.exitCode != 0) {
         throw new Exception('重新签名失败');
       }
     }
+
+    await shell.run('cp  $releasePackage $savePath');
 
   }
 
   @override
   FutureOr<void> build(BuildModel model) async{
     String appPath = Utils.appPath(model.build_id);
+    String source = '$appPath/$gitSrc';
 
-    String gitSrc = 'template-mdm';
-    String templatePath = '$appPath/$gitSrc';
     b() async {
 
-//      /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
-//      await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
-//          path: appPath,
-//          branch: getName(),
-//          name: gitSrc);
-//
-//      /// 准备工作, 下载实际的svn代码, 并把需要的代码合并到模板工程中
-//      await prepare(model, templatePath);
-//
-//      ///  修改app icon
-//      await changeRes(model, appPath, templatePath);
-//
-//      /// 修改配置
-//      await changeConfig(model, templatePath);
+      /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
+      await preSource(model, appPath);
+
+      /// 准备工作, 下载实际的svn代码, 并把需要的代码合并到模板工程中
+      await prepare(model, source);
+
+      ///  修改app icon
+      await changeRes(model, appPath, source);
+
+      /// 修改配置
+      await changeConfig(model, source);
 
       /// 开始编译
-      await realBuild(model, '/home/sun/.mdm_build/apps/4f439690-3260-11e9-eab2-43979b83c173/template-mdm/');
+      await realBuild(model, source);
 
       /// 编译后处理
-      await afterBuild(model, templatePath);
+      await afterBuild(model, source);
 
       model.status = BuildStatus.SUCCESS;
-      await DBManager.save(Constant.TABLE_BUILD, 'build_id', model.toJson());
+      await DBManager.save(Constant.TABLE_BUILD, id: PROP_BUILD_ID, data: model.toJson());
       Utils.log('${model.build_id}, 打包结束.....');
     }
 
     runZoned((){
       b();
-    }, onError: (e) async {
-      Utils.log(e.toString());
+    }, onError: (e, stacks) async {
+      Utils.log(e);
+      print(stacks);
       model.status = BuildStatus.newFailed(e.toString());
-      await DBManager.save(Constant.TABLE_BUILD, 'build_id', model.toJson());
+      await DBManager.save(Constant.TABLE_BUILD, id: PROP_BUILD_ID, data: model.toJson());
     });
   }
 }

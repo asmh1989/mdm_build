@@ -31,7 +31,7 @@ main(List<String> args) async {
   DBManager.connect();
 
   /// 编译框架初始化
-  Build.init();
+  await Build.init();
 
   var handler = const shelf.Pipeline()
       .addMiddleware(shelf.logRequests())
@@ -57,8 +57,10 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
         String key = await Build.start(params);
 
-        Utils.log('body : ${json.encode(params.toJson())}');
+//        Utils.log('body : ${json.encode(params.toJson())}');
         return shelf.Response.ok(Utils.ok({'id': key}));
+      } else if(request.url.path == 'config/sun') {
+        return shelf.Response.ok(Utils.ok({'env': await Build.initConfig(body)}));
       }
     } catch (e){
       Utils.log(e);

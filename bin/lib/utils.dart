@@ -4,13 +4,16 @@ import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 import 'package:shell/shell.dart';
 
+import 'model/config_model.dart';
 
 class Utils {
   static Uuid _uuid = new Uuid();
 
   static Dio _dio = new Dio();
 
-  static String get cachePath => '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}/.mdm_build';
+  static String get HOME => '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}';
+
+  static String get cachePath => env_config.cache_home;
 
   static String newKey(){
     return _uuid.v1();

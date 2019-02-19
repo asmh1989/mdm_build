@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:shell/shell.dart' ;
 
 import 'utils.dart';
+import 'model/config_model.dart';
 
 class Shell2 {
   Shell _shell;
@@ -9,7 +10,9 @@ class Shell2 {
   final String workDir;
   final Map<String, String> env;
   Shell2({this.workDir, this.env}){
-    _shell= new Shell( workingDirectory: workDir, environment: env);
+    Map<String, String> config_env = env_config.toJson2();
+    config_env.addAll(env??{});
+    _shell= new Shell( workingDirectory: workDir, environment: config_env);
   }
 
   Future run(String command, [String dir]) async{

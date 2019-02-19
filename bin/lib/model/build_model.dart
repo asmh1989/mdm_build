@@ -1,5 +1,10 @@
 import '../params/build_params.dart';
 
+const PROP_BUILD_ID = 'build_id';
+const PROP_CODE = 'code';
+const PROP_MSG = 'msg';
+const PROP_PARAMS = 'params';
+
 class BuildStatus {
   int code;
 
@@ -27,16 +32,12 @@ class BuildModel {
 
   BuildStatus status = BuildStatus.WAITING;
 
-  String local_url='';
-
-  String local_path='';
 
   BuildParams params;
 
 
   BuildModel({
     this.build_id,
-    this.local_url = '',
     this.params
   });
 
@@ -45,29 +46,25 @@ class BuildModel {
     if(date == null){
         date = DateTime.now();
     }
-    build_id = json['build_id'];
-    var info = json['code'];
+    build_id = json[PROP_BUILD_ID];
+    var info = json[PROP_CODE];
     if(info != null){
-      status = BuildStatus(code: info, msg: json['msg']);
+      status = BuildStatus(code: info, msg: json[PROP_MSG]);
     } else {
       status = BuildStatus.WAITING;
     }
 
-    info = BuildParams.fromJson(json[params]);
-    local_url  = json['local_url'];
-    local_path = json['local_path'];
+    info = BuildParams.fromJson(json[PROP_PARAMS]);
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['date'] = this.date;
-    data['build_id'] = this.build_id;
-    data['code'] = this.status?.code;
-    data['msg'] = this.status?.msg;
+    data[PROP_BUILD_ID] = this.build_id;
+    data[PROP_CODE] = this.status?.code;
+    data[PROP_MSG] = this.status?.msg;
 
-    data['local_url'] = this.local_url;
-    data['params'] = this.params?.toJson();
-    data['local_path'] = this.local_path;
+    data[PROP_PARAMS] = this.params?.toJson();
     return data;
   }
 }
