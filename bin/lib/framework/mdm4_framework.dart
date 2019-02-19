@@ -84,7 +84,7 @@ class UpdateAndroidManifest extends XmlTransformer {
 
 class MDM4Framework implements BaseFramework {
 
-  String gitSrc = 'template-mdm';
+  String sourceName = 'source';
 
   @override
   String getName() {
@@ -99,7 +99,7 @@ class MDM4Framework implements BaseFramework {
     await Utils.clone(url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
         path: appPath,
         branch: getName(),
-        name: gitSrc);
+        name: sourceName);
   }
 
   void prepare(BuildModel model, String source) async {
@@ -174,23 +174,21 @@ class MDM4Framework implements BaseFramework {
       final propertiesFile = source + '/app/src/main/assets/config.properties';
 
       /// 修改properties配置
-      if(new File(propertiesFile).existsSync()){
-        for(var key in model.params.app_config.keys){
-          ProcessResult find = await shell.run('cat $propertiesFile | grep ^$key=');
-          if(find.exitCode == 0){
-            await shell.run('sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
-          } else {
-            await shell.run('echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
-          }
+      if(new File(propertiesFile).existsSync()) {
+        new File(propertiesFile).createSync(recursive: true);
+      }
+      for(var key in model.params.app_config.keys){
+        ProcessResult find = await shell.run('cat $propertiesFile | grep ^$key=');
+        if(find.exitCode == 0){
+          await shell.run('sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
+        } else {
+          await shell.run('echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
         }
-      } else {
-        Utils.log('$propertiesFile is not exist');
       }
 
     } else {
       throw new Exception('$source 中未发现AndroidManifest.xml文件');
     }
-
 
   }
 
@@ -205,6 +203,7 @@ class MDM4Framework implements BaseFramework {
     Utils.log('-----------------${model.build_id} 打包结束---------------------');
 
     if (result.exitCode != 0) {
+      Utils.log(result.stderr);
       throw new Exception('编译失败, ${result.stderr}');
     }
 
@@ -237,7 +236,7 @@ class MDM4Framework implements BaseFramework {
   @override
   FutureOr<void> build(BuildModel model) async{
     String appPath = Utils.appPath(model.build_id);
-    String source = '$appPath/$gitSrc';
+    String source = '$appPath/$sourceName';
 
     b() async {
 
@@ -247,7 +246,7 @@ class MDM4Framework implements BaseFramework {
       /// 准备工作, 下载实际的svn代码, 并把需要的代码合并到模板工程中
       await prepare(model, source);
 
-      ///  修改app icon
+      /// 修改app icon
       await changeRes(model, appPath, source);
 
       /// 修改配置
