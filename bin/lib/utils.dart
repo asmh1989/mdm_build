@@ -52,14 +52,24 @@ class Utils {
     }
   }
 
-  static Future<void> clone({String url, String branch, String path,  String name}) async {
+  static Future<void> clone({String url, String branch, String path, String name}) async {
 
     try{
-      log('start git clone ... $url to $path');
+      log('start git clone ... $url to $name');
 
-      var shell = new Shell(workingDirectory: path);
+      var shell = new Shell(workingDirectory: path??HOME);
 
-      var result = await shell.run('git', ['clone', url, '-b', branch, name]);
+      var list = ['clone',  url];
+      if(branch != null){
+        list.add('-b');
+        list.add(branch);
+      }
+
+      if(name != null) {
+        list.add(name);
+      }
+
+      var result = await shell.run('git', list);
 
       log('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
       if(result.exitCode != 0){

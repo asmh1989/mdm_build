@@ -7,6 +7,7 @@ import 'framework/base.dart';
 import 'framework/mdm4_framework.dart';
 import 'framework/mdm41_framework.dart';
 import 'framework/mdm42_framework.dart';
+import 'framework/normal_framework.dart';
 
 import 'params/build_params.dart';
 import 'model/build_model.dart';
@@ -65,6 +66,7 @@ class Build {
       lists.add(new MDM4Framework());
       lists.add(new MDM41Framework());
       lists.add(new MDM42Framework());
+      lists.add(new NormalFramework());
 
       for(BaseFramework framework in lists){
         _frameworks[framework.getName()] = framework;

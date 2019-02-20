@@ -144,15 +144,18 @@ class MDM4Framework implements BaseFramework {
     String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = new File(manifestFilePath);
     if(file.existsSync()){
-      var svn_version = model.params.app_info.svn_version;
-      if(svn_version == null){
-        var result = await shell.run("svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
-        svn_version =  int.parse(result.stdout.toString().trim());
+      var meta = app.meta;
+
+      if(Directory(tmpSrc).existsSync()){
+        var svn_version = model.params.app_info.svn_version;
+        if(svn_version == null){
+          var result = await shell.run("svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
+          svn_version =  int.parse(result.stdout.toString().trim());
+        }
+        Utils.log('svn_version = $svn_version');
+        meta['svn-version'] = '$svn_version';
       }
 
-      Utils.log('svn_version = $svn_version');
-
-      var meta = app.meta;
       Map<String, String> attrs = new Map();
 
       if(app.app_name != null && app.app_name.isNotEmpty){
@@ -163,7 +166,6 @@ class MDM4Framework implements BaseFramework {
         attrs['android:icon'] = '@drawable/auto_build_icon';
       }
 
-      meta['svn-version'] = '$svn_version';
 
       var doc =  parse(await file.readAsString());
 
