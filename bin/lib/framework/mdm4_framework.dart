@@ -210,7 +210,7 @@ class MDM4Framework implements BaseFramework {
   }
 
   void afterBuild(BuildModel model, String source) async {
-    var savePath = Utils.packagePath(model.build_id);
+    var savePath = Utils.packagePath(model.build_id)+'.apk';
     var releasePackage = '$source/app/build/outputs/apk/app-release.apk';
     if(!File(releasePackage).existsSync()){
       releasePackage = '$source/app/build/outputs/apk/release/app-release.apk';

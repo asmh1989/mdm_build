@@ -11,7 +11,7 @@ import 'lib/params/build_params.dart';
 import 'lib/db.dart';
 import 'lib/build.dart';
 import 'lib/utils.dart';
-
+import 'lib/download.dart';
 
 main(List<String> args) async {
   var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '8080');
@@ -60,7 +60,6 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
           }
         }
       } catch (e){
-        return shelf.Response.ok(Utils.error({'msg': '参数错误'}));
       }
 
       var data = await Build.getBuilds(status: params['status'], page: params['page'], pageSize: params['pageSize']);
@@ -73,20 +72,21 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         try{
           status = int.parse(request.url.query.split('=').last);
         } catch (e){
-          return shelf.Response.ok(Utils.error({'msg': '参数错误'}));
         }
       }
 
       return shelf.Response.ok(Utils.ok({'data': await Build.getCount(status)}));
 
     } else if(request.url.path.startsWith('app/query/')){
-      var data = await Build.getBuild(request.url.path.split('/').last);
+      var data = await Build.getBuild(request.url.pathSegments.last);
       if(data != null){
         return shelf.Response.ok(Utils.ok({'data': data}));
       } else {
         return shelf.Response.ok(Utils.error({'msg': '非法id'}));
       }
 
+    } else if(request.url.path.startsWith('app/package/')){
+      return await downloadStaticFile(request);
     } else {
       return shelf.Response.forbidden('forbidden for "${request.url}"');
     }

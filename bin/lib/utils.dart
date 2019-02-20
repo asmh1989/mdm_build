@@ -23,7 +23,7 @@ class Utils {
     if(!Directory('$cachePath/packages').existsSync()){
       Directory('$cachePath/packages').createSync(recursive: true);
     }
-    return '$cachePath/packages/$build_id.apk';
+    return '$cachePath/packages/$build_id';
   }
 
   static String logPath(String build_id){
