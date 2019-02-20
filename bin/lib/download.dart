@@ -36,9 +36,6 @@ FutureOr<Response> downloadStaticFile(Request request) async {
     return new Response.notFound('Not Found');
   }
 
-  // when serving the default document for a directory, if the requested
-  // path doesn't end with '/', redirect to the path with a trailing '/'
-
   return _handleFile(request, file, () async {
     return contentTypeResolver.lookup(file.path);
   }, build_id);
