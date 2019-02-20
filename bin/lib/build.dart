@@ -164,4 +164,12 @@ class Build {
       return null;
     }
   }
+
+  static Future getCount([int status]) async {
+    var w;
+    if(status != null){
+      w = where.eq(PROP_CODE, status);
+    }
+    return DBManager.count(Constant.TABLE_BUILD, w);
+  }
 }

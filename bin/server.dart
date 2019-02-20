@@ -50,7 +50,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
       Map<String, dynamic> params = {};
 
       try{
-        if(request.url.query != null){
+        if(request.url.query != null && request.url.query.isNotEmpty){
           var list = request.url.query.split('&');
           for(var d in list){
             if(d.contains('=')){
@@ -66,6 +66,18 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
       var data = await Build.getBuilds(status: params['status'], page: params['page'], pageSize: params['pageSize']);
 
       return shelf.Response.ok(Utils.ok({'data': data}));
+
+    } else if(request.url.path == 'app/count'){
+      var status;
+      if(request.url.query != null && request.url.query.isNotEmpty ){
+        try{
+          status = int.parse(request.url.query.split('=').last);
+        } catch (e){
+          return shelf.Response.ok(Utils.error({'msg': '参数错误'}));
+        }
+      }
+
+      return shelf.Response.ok(Utils.ok({'data': await Build.getCount(status)}));
 
     } else if(request.url.path.startsWith('app/query/')){
       var data = await Build.getBuild(request.url.path.split('/').last);
