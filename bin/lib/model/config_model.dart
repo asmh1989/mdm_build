@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import '../utils.dart';
 
 ConfigModel env_config;
@@ -9,6 +10,8 @@ const PROP_JAVA_HOME = 'JAVA_HOME';
 const PROP_ZKM_JAR = 'ZKM_JAR';
 const PROP_CACHE_HOME = 'CACHE_HOME';
 
+const PROP_WHITE_IPS = 'white_ips';
+
 class ConfigModel {
 
   int max_build;
@@ -17,12 +20,15 @@ class ConfigModel {
   String zkm_jar;
   String cache_home;
 
+  Map<String, bool> white_ips;
+
   ConfigModel({
     this.max_build,
     this.android_home,
     this.java_home,
     this.cache_home,
-    this.zkm_jar
+    this.zkm_jar,
+    this.white_ips
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json){
@@ -31,6 +37,7 @@ class ConfigModel {
     java_home = json[PROP_JAVA_HOME] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
     zkm_jar = json[PROP_ZKM_JAR] ?? '${Utils.HOME}/bin/ZKM.jar';
     cache_home = json[PROP_CACHE_HOME] ?? '${Utils.HOME}/.mdm_build';
+    white_ips = json[PROP_WHITE_IPS] ?? {};
   }
 
   void merge(ConfigModel update){
@@ -53,6 +60,12 @@ class ConfigModel {
 
     if(update.cache_home != null && update.cache_home.isNotEmpty && update.cache_home != cache_home){
       cache_home = update.cache_home;
+    }
+
+    if(update.white_ips != null){
+      for(var key in update.white_ips.keys){
+        white_ips[key] = update.white_ips[key];
+      }
     }
   }
 
@@ -103,6 +116,7 @@ class ConfigModel {
     data[PROP_JAVA_HOME] = java_home;
     data[PROP_ZKM_JAR] = zkm_jar;
     data[PROP_CACHE_HOME] = cache_home;
+    data[PROP_WHITE_IPS] = white_ips;
     return data;
   }
 
@@ -114,6 +128,7 @@ class ConfigModel {
     data[PROP_JAVA_HOME] = java_home;
     data[PROP_ZKM_JAR] = zkm_jar;
     data[PROP_CACHE_HOME] = cache_home;
+    data[PROP_WHITE_IPS] = json.encode(white_ips);
     return data;
   }
 

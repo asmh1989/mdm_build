@@ -45,6 +45,14 @@ main(List<String> args) async {
 
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
+  var connectionInfo = request.context['shelf.io.connection_info'] as HttpConnectionInfo;
+
+  var ip = connectionInfo.remoteAddress.address;
+
+  if(!Build.isWhiteIp(ip)){
+    return shelf.Response.forbidden('forbidden for "${request.url}"');
+  }
+
   if(request.method == 'GET'){
     if(request.url.path =='app/query'){
       Map<String, dynamic> params = {};

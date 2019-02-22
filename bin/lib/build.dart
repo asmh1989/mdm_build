@@ -92,7 +92,8 @@ class Build {
           android_home: config[PROP_ANDROID_HOME],
           java_home: config[PROP_JAVA_HOME],
           cache_home: config[PROP_CACHE_HOME],
-          zkm_jar: config[PROP_ZKM_JAR]
+          zkm_jar: config[PROP_ZKM_JAR],
+          white_ips: config[PROP_WHITE_IPS]
       ));
 
       await DBManager.save(Constant.TABLE_CONFIG, data:env_config.toJson());
@@ -173,5 +174,13 @@ class Build {
       w = where.eq(PROP_CODE, status);
     }
     return DBManager.count(Constant.TABLE_BUILD, w);
+  }
+
+  static bool isWhiteIp(String ip){
+    if(env_config.white_ips.isNotEmpty){
+      return env_config.white_ips.containsKey(ip);
+    } else {
+      return true;
+    }
   }
 }
