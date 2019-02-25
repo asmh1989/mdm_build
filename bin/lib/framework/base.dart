@@ -8,5 +8,4 @@ abstract class BaseFramework {
 
   /// 打包过程
   FutureOr<void> build(BuildModel params);
-
 }

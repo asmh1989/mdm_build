@@ -5,4 +5,3 @@ class Constant {
   static const String TABLE_RELEASE = 'release';
   static const String TABLE_CONFIG = 'config';
 }
-

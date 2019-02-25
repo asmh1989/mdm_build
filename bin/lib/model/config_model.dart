@@ -13,7 +13,6 @@ const PROP_CACHE_HOME = 'CACHE_HOME';
 const PROP_WHITE_IPS = 'white_ips';
 
 class ConfigModel {
-
   int max_build;
   String android_home;
   String java_home;
@@ -22,16 +21,15 @@ class ConfigModel {
 
   Map<String, bool> white_ips;
 
-  ConfigModel({
-    this.max_build,
-    this.android_home,
-    this.java_home,
-    this.cache_home,
-    this.zkm_jar,
-    this.white_ips
-  });
+  ConfigModel(
+      {this.max_build,
+      this.android_home,
+      this.java_home,
+      this.cache_home,
+      this.zkm_jar,
+      this.white_ips});
 
-  ConfigModel.fromJson(Map<String, dynamic> json){
+  ConfigModel.fromJson(Map<String, dynamic> json) {
     max_build = json[PROP_MAX_BUILD] ?? 3;
     android_home = json[PROP_ANDROID_HOME] ?? '${Utils.HOME}/Android/Sdk';
     java_home = json[PROP_JAVA_HOME] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
@@ -40,73 +38,81 @@ class ConfigModel {
     white_ips = json[PROP_WHITE_IPS] ?? {};
   }
 
-  void merge(ConfigModel update){
+  void merge(ConfigModel update) {
     update.verify();
-    if(update.max_build != null && update.max_build != max_build && update.max_build > 2){
+    if (update.max_build != null &&
+        update.max_build != max_build &&
+        update.max_build > 2) {
       max_build = update.max_build;
     }
 
-    if(update.android_home != null && update.android_home.isNotEmpty && update.android_home != android_home){
+    if (update.android_home != null &&
+        update.android_home.isNotEmpty &&
+        update.android_home != android_home) {
       android_home = update.android_home;
     }
 
-    if(update.java_home != null && update.java_home.isNotEmpty && update.java_home != java_home){
+    if (update.java_home != null &&
+        update.java_home.isNotEmpty &&
+        update.java_home != java_home) {
       java_home = update.java_home;
     }
 
-    if(update.zkm_jar != null && update.zkm_jar.isNotEmpty && update.zkm_jar != zkm_jar){
+    if (update.zkm_jar != null &&
+        update.zkm_jar.isNotEmpty &&
+        update.zkm_jar != zkm_jar) {
       zkm_jar = update.zkm_jar;
     }
 
-    if(update.cache_home != null && update.cache_home.isNotEmpty && update.cache_home != cache_home){
+    if (update.cache_home != null &&
+        update.cache_home.isNotEmpty &&
+        update.cache_home != cache_home) {
       cache_home = update.cache_home;
     }
 
-    if(update.white_ips != null){
-      for(var key in update.white_ips.keys){
+    if (update.white_ips != null) {
+      for (var key in update.white_ips.keys) {
         white_ips[key] = update.white_ips[key];
       }
     }
   }
 
-  void verify() async{
+  void verify() async {
+    if (cache_home != null && !cache_home.startsWith('/')) {
+      cache_home = null;
+    }
 
-      if(cache_home != null && !cache_home.startsWith('/')){
-        cache_home = null;
-      }
-
-      if(android_home != null){
-        if(android_home.startsWith('/')) {
-          File adb = File('$android_home/platform-tools/adb');
-          if (!adb.existsSync()) {
-            android_home = null;
-          }
-        } else {
+    if (android_home != null) {
+      if (android_home.startsWith('/')) {
+        File adb = File('$android_home/platform-tools/adb');
+        if (!adb.existsSync()) {
           android_home = null;
         }
+      } else {
+        android_home = null;
       }
+    }
 
-      if(java_home != null){
-        if(java_home.startsWith('/')) {
-          File java = File('$java_home/bin/java');
-          if (!java.existsSync()) {
-            java_home = null;
-          }
-        } else {
+    if (java_home != null) {
+      if (java_home.startsWith('/')) {
+        File java = File('$java_home/bin/java');
+        if (!java.existsSync()) {
           java_home = null;
         }
+      } else {
+        java_home = null;
       }
+    }
 
-      if(zkm_jar != null){
-        if(zkm_jar.startsWith('/')){
-          if(!File(zkm_jar).existsSync()){
-            zkm_jar = null;
-          }
-        } else {
+    if (zkm_jar != null) {
+      if (zkm_jar.startsWith('/')) {
+        if (!File(zkm_jar).existsSync()) {
           zkm_jar = null;
         }
+      } else {
+        zkm_jar = null;
       }
-
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -120,7 +126,6 @@ class ConfigModel {
     return data;
   }
 
-
   Map<String, String> toJson2() {
     final Map<String, String> data = new Map<String, String>();
     data[PROP_MAX_BUILD] = '$max_build';
@@ -131,5 +136,4 @@ class ConfigModel {
     data[PROP_WHITE_IPS] = json.encode(white_ips);
     return data;
   }
-
 }

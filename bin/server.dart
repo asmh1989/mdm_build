@@ -42,63 +42,61 @@ main(List<String> args) async {
   Utils.log('Serving at http://${server.address.host}:${server.port}');
 }
 
-
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
-
-  var connectionInfo = request.context['shelf.io.connection_info'] as HttpConnectionInfo;
+  var connectionInfo =
+      request.context['shelf.io.connection_info'] as HttpConnectionInfo;
 
   var ip = connectionInfo.remoteAddress.address;
 
-  if(!Build.isWhiteIp(ip)){
+  if (!Build.isWhiteIp(ip)) {
     return shelf.Response.forbidden('forbidden for "${request.url}"');
   }
 
-  if(request.method == 'GET'){
-    if(request.url.path =='app/query'){
+  if (request.method == 'GET') {
+    if (request.url.path == 'app/query') {
       Map<String, dynamic> params = {};
 
-      try{
-        if(request.url.query != null && request.url.query.isNotEmpty){
+      try {
+        if (request.url.query != null && request.url.query.isNotEmpty) {
           var list = request.url.query.split('&');
-          for(var d in list){
-            if(d.contains('=')){
+          for (var d in list) {
+            if (d.contains('=')) {
               var l = d.split('=');
               params[l[0]] = int.parse(l[1]);
             }
           }
         }
-      } catch (e){
-      }
+      } catch (e) {}
 
-      var data = await Build.getBuilds(status: params['status'], page: params['page'], pageSize: params['pageSize']);
+      var data = await Build.getBuilds(
+          status: params['status'],
+          page: params['page'],
+          pageSize: params['pageSize']);
 
       return shelf.Response.ok(Utils.ok({'data': data}));
-
-    } else if(request.url.path == 'app/count'){
+    } else if (request.url.path == 'app/count') {
       var status;
-      if(request.url.query != null && request.url.query.isNotEmpty ){
-        try{
+      if (request.url.query != null && request.url.query.isNotEmpty) {
+        try {
           status = int.parse(request.url.query.split('=').last);
-        } catch (e){
-        }
+        } catch (e) {}
       }
 
-      return shelf.Response.ok(Utils.ok({'data': await Build.getCount(status)}));
-
-    } else if(request.url.path.startsWith('app/query/')){
+      return shelf.Response.ok(
+          Utils.ok({'data': await Build.getCount(status)}));
+    } else if (request.url.path.startsWith('app/query/')) {
       var data = await Build.getBuild(request.url.pathSegments.last);
-      if(data != null){
+      if (data != null) {
         return shelf.Response.ok(Utils.ok({'data': data}));
       } else {
         return shelf.Response.ok(Utils.error({'msg': '非法id'}));
       }
-
-    } else if(request.url.path.startsWith('app/package/')){
+    } else if (request.url.path.startsWith('app/package/')) {
       return await downloadStaticFile(request);
     } else {
       return shelf.Response.forbidden('forbidden for "${request.url}"');
     }
-  } else if(request.method == 'POST'){
+  } else if (request.method == 'POST') {
     try {
       Map body = json.decode(await request.readAsString());
 
@@ -110,17 +108,16 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
 //        Utils.log('body : ${json.encode(params.toJson())}');
         return shelf.Response.ok(Utils.ok({'id': key}));
-      } else if(request.url.path == 'config/sun') {
-        return shelf.Response.ok(Utils.ok({'env': await Build.initConfig(body)}));
+      } else if (request.url.path == 'config/sun') {
+        return shelf.Response.ok(
+            Utils.ok({'env': await Build.initConfig(body)}));
       }
-    } catch (e){
+    } catch (e) {
       Utils.log(e.toString());
-      return shelf.Response.ok(Utils.error({'msg':e.toString()}));
+      return shelf.Response.ok(Utils.error({'msg': e.toString()}));
     }
 
-
     return shelf.Response.forbidden('forbidden for "${request.url}"');
-
   } else {
     return shelf.Response.ok('Request for "${request.url}"');
   }

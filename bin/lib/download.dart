@@ -8,7 +8,6 @@ import 'package:mime/mime.dart';
 
 import 'utils.dart';
 
-
 final _defaultMimeTypeResolver = new MimeTypeResolver();
 
 DateTime toSecondResolution(DateTime dt) {
@@ -17,7 +16,6 @@ DateTime toSecondResolution(DateTime dt) {
 }
 
 FutureOr<Response> downloadStaticFile(Request request) async {
-
   MimeTypeResolver contentTypeResolver = _defaultMimeTypeResolver;
 
   var build_id = request.url.pathSegments.last;
@@ -39,11 +37,11 @@ FutureOr<Response> downloadStaticFile(Request request) async {
   return _handleFile(request, file, () async {
     return contentTypeResolver.lookup(file.path);
   }, build_id);
-
 }
 
 Future<Response> _handleFile(
-    Request request, File file, FutureOr<String> getContentType(), [String fileName]) async {
+    Request request, File file, FutureOr<String> getContentType(),
+    [String fileName]) async {
   var stat = file.statSync();
   var ifModifiedSince = request.ifModifiedSince;
 

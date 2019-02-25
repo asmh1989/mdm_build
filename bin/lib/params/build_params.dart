@@ -11,19 +11,14 @@ class BuildParams {
   /// 应用配置
   Map<String, dynamic> app_config;
 
-  BuildParams({
-    this.framework,
-    this.app_config,
-    this.app_info
-  });
+  BuildParams({this.framework, this.app_config, this.app_info});
 
   BuildParams.fromJson(Map<String, dynamic> json) {
     framework = json['framework'];
     app_config = json['app_config'];
     var info = json['app_info'];
-    if(info != null){
+    if (info != null) {
       app_info = AppInfo.fromJson(info);
-
     }
   }
 
@@ -34,7 +29,6 @@ class BuildParams {
     data['app_info'] = this.app_info?.toJson();
     return data;
   }
-
 }
 
 class AppInfo {
@@ -62,7 +56,6 @@ class AppInfo {
   /// meta-data参数配置
   Map<String, String> meta;
 
-
   AppInfo({
     this.project_name,
     this.source_url,
@@ -78,7 +71,7 @@ class AppInfo {
     project_name = json['project_name'];
     source_url = json['source_url'];
 
-    if(!RegexUtil.isURL(source_url)){
+    if (!RegexUtil.isURL(source_url)) {
       throw new Exception('source_url 类型错误');
     }
 
@@ -86,13 +79,13 @@ class AppInfo {
     version_name = json['version_name'];
     version_code = json['version_code'];
     app_name = json['app_name'];
-    app_icon = json['app_icon']??'';
+    app_icon = json['app_icon'] ?? '';
 
-    if(app_icon.isNotEmpty && !RegexUtil.isURL(app_icon)){
+    if (app_icon.isNotEmpty && !RegexUtil.isURL(app_icon)) {
       throw new Exception('app_icon 类型错误');
     }
 
-    meta = (json['meta']??{})?.cast<String, String>();
+    meta = (json['meta'] ?? {})?.cast<String, String>();
   }
 
   Map<String, dynamic> toJson() {
