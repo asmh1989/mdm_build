@@ -242,6 +242,8 @@ class MDM4Framework implements BaseFramework {
 
     b() async {
 
+      var build_time = DateTime.now();
+
       /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
       await preSource(model, appPath);
 
@@ -261,6 +263,7 @@ class MDM4Framework implements BaseFramework {
       await afterBuild(model, source);
 
       model.status = BuildStatus.SUCCESS;
+      model.build_time = DateTime.now().difference(build_time).inSeconds.abs();
       await DBManager.save(Constant.TABLE_BUILD, id: PROP_BUILD_ID, data: model.toJson());
       Utils.log('${model.build_id}, 打包结束.....');
     }
@@ -269,7 +272,6 @@ class MDM4Framework implements BaseFramework {
       b();
     }, onError: (e, stacks) async {
       Utils.log(e);
-      print(stacks);
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.TABLE_BUILD, id: PROP_BUILD_ID, data: model.toJson());
     });

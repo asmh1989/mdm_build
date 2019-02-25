@@ -114,9 +114,11 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         return shelf.Response.ok(Utils.ok({'env': await Build.initConfig(body)}));
       }
     } catch (e){
-      Utils.log(e);
+      Utils.log(e.toString());
       return shelf.Response.ok(Utils.error({'msg':e.toString()}));
     }
+
+
     return shelf.Response.forbidden('forbidden for "${request.url}"');
 
   } else {

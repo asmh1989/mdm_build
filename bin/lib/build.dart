@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:mongo_dart/mongo_dart.dart' ;
+import 'package:path/path.dart' as P;
 
 import 'framework/base.dart';
 
@@ -19,6 +20,7 @@ import 'db.dart';
 void _doTimerWork()  async {
   Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
   await Build.initConfig();
+  await _clearCache();
   while(true) {
     int buildings = await DBManager.count(Constant.TABLE_BUILD,
         where.eq(PROP_CODE, BuildStatus.BUILDING.code));
@@ -40,9 +42,7 @@ void _doTimerWork()  async {
   var builds = await DBManager.find(Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
   for(var data in await builds.toList()){
     BuildModel model = BuildModel.fromJson(data);
-
-    var now = DateTime.now().millisecondsSinceEpoch;
-    if(now -  model.date.millisecondsSinceEpoch> 20*60*1000){
+    if(model.date.difference(DateTime.now()).inMinutes.abs() > 20){
       Utils.log('发现异常的打包记录, ${model.build_id}, date: ${model.date.toIso8601String()}');
       Directory app = new Directory(Utils.appPath(model.build_id));
       if(app.existsSync()){
@@ -50,6 +50,38 @@ void _doTimerWork()  async {
       }
 
       await Build._build(model);
+    }
+  }
+}
+
+void _clearCache() async {
+  var appPath = P.normalize(Utils.appPath(''));
+
+  Directory apps = new Directory(appPath);
+
+  if(apps.existsSync()){
+    for(var file in apps.listSync()){
+      var name = P.basename(file.path);
+      var data = await DBManager.findOne(Constant.TABLE_BUILD,
+          where.eq(PROP_BUILD_ID, name));
+      bool willDel = false;
+      if(data != null){
+        BuildModel model = BuildModel.fromJson(data);
+        if(model.status.code < BuildStatus.WAITING.code){
+          willDel = true;
+        }
+      }
+
+
+      if(willDel){
+        var stat = file.statSync();
+        /// 大于三天就开始清理编译目录
+        if(stat.modified.difference(DateTime.now()).inDays.abs() > 3){
+          Utils.log('清理缓存... ${file.path}, ${stat.modified.toIso8601String()}');
+          file.deleteSync(recursive: true);
+          break;
+        }
+      }
     }
   }
 }
@@ -103,6 +135,7 @@ class Build {
   }
 
   static void _build(BuildModel model) async {
+    Utils.log('${model.build_id} .... 进入打包状态');
     BaseFramework framework = _frameworks[model.params.framework];
     if(framework == null){
       model.status = BuildStatus.newFailed('不支持的 framework: ${model.params.framework}');

@@ -124,8 +124,8 @@ class Utils {
     return json.encode({'error': res}, toEncodable: myEncode);
   }
 
-  static void log(String msg){
-    print('${DateTime.now().toIso8601String()} $msg');
+  static void log(var msg){
+    print('${DateTime.now().toIso8601String()} ${msg.toString()}');
   }
 
 }
