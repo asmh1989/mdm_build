@@ -144,7 +144,9 @@ class MDM4Framework implements BaseFramework {
     String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = new File(manifestFilePath);
     if (file.existsSync()) {
-      var meta = app.meta;
+      var meta = {};
+
+      meta.addAll(app.meta);
 
       if (Directory(tmpSrc).existsSync()) {
         var svn_version = model.params.app_info.svn_version;
