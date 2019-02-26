@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:path/path.dart' as P;
 
@@ -109,6 +110,8 @@ class Build {
     }
     await initConfig();
 
+    Utils.log('env_config: ${json.encode(env_config.toJson())}');
+
     new Timer.periodic(new Duration(seconds: 60), (Timer t) => _doTimerWork());
 
     new Timer(Duration(seconds: 2), () => _doTimerWork());
@@ -118,6 +121,10 @@ class Build {
     var data = await DBManager.findOne(Constant.TABLE_CONFIG);
     env_config = ConfigModel.fromJson(data ?? {});
 
+    if(data == null){
+      await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
+    }
+
     if (config != null) {
       env_config.merge(new ConfigModel(
           max_build: config[PROP_MAX_BUILD],
@@ -126,9 +133,10 @@ class Build {
           cache_home: config[PROP_CACHE_HOME],
           zkm_jar: config[PROP_ZKM_JAR],
           white_ips: config[PROP_WHITE_IPS]));
+      Utils.log('env_config: ${json.encode(env_config.toJson())}');
+      await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
     }
 
-    await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
 
     return env_config.toJson();
   }
