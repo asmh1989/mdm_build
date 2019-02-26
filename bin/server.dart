@@ -14,7 +14,7 @@ import 'lib/utils.dart';
 import 'lib/download.dart';
 
 main(List<String> args) async {
-  var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '8080');
+  var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '7001');
 
   var result = parser.parse(args);
 

@@ -144,7 +144,7 @@ class MDM4Framework implements BaseFramework {
     String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = new File(manifestFilePath);
     if (file.existsSync()) {
-      var meta = {};
+      var meta = new Map<String, String>();
 
       meta.addAll(app.meta);
 
@@ -279,6 +279,7 @@ class MDM4Framework implements BaseFramework {
       b();
     }, onError: (e, stacks) async {
       Utils.log(e);
+      print(stacks);
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.TABLE_BUILD,
           id: PROP_BUILD_ID, data: model.toJson());

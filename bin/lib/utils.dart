@@ -56,7 +56,7 @@ class Utils {
   static Future<void> clone(
       {String url, String branch, String path, String name}) async {
     try {
-      log('start git clone ... $url to $name');
+      log('start git clone ... $url to ${path??''}/$name');
 
       var shell = new Shell(workingDirectory: path ?? HOME);
 
