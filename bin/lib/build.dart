@@ -21,7 +21,7 @@ import 'db.dart';
 DateTime _last_build = DateTime.now();
 
 void _doTimerWork() async {
-  if(DateTime.now().difference(_last_build).inMinutes.abs() < 3) {
+  if (DateTime.now().difference(_last_build).inMinutes.abs() < 3) {
     Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
   }
   await Build.initConfig();
@@ -125,7 +125,7 @@ class Build {
     var data = await DBManager.findOne(Constant.TABLE_CONFIG);
     env_config = ConfigModel.fromJson(data ?? {});
 
-    if(data == null){
+    if (data == null) {
       await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
     }
 
@@ -140,7 +140,6 @@ class Build {
       Utils.log('env_config: ${json.encode(env_config.toJson())}');
       await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
     }
-
 
     return env_config.toJson();
   }

@@ -72,7 +72,7 @@ class ConfigModel {
 
     if (update.white_ips != null) {
       for (var key in update.white_ips) {
-        if(!white_ips.contains(key)){
+        if (!white_ips.contains(key)) {
           white_ips.add(key);
         }
       }
