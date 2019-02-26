@@ -10,7 +10,7 @@ const PROP_JAVA_HOME = 'JAVA_HOME';
 const PROP_ZKM_JAR = 'ZKM_JAR';
 const PROP_CACHE_HOME = 'CACHE_HOME';
 
-const PROP_WHITE_IPS = 'white_ips';
+const PROP_WHITE_IPS = 'WHITE_IPS';
 
 class ConfigModel {
   int max_build;
@@ -19,7 +19,7 @@ class ConfigModel {
   String zkm_jar;
   String cache_home;
 
-  Map<String, bool> white_ips;
+  List<dynamic> white_ips;
 
   ConfigModel(
       {this.max_build,
@@ -35,7 +35,7 @@ class ConfigModel {
     java_home = json[PROP_JAVA_HOME] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
     zkm_jar = json[PROP_ZKM_JAR] ?? '${Utils.HOME}/bin/ZKM.jar';
     cache_home = json[PROP_CACHE_HOME] ?? '${Utils.HOME}/.mdm_build';
-    white_ips = json[PROP_WHITE_IPS] ?? {};
+    white_ips = json[PROP_WHITE_IPS] ?? [];
   }
 
   void merge(ConfigModel update) {
@@ -71,8 +71,10 @@ class ConfigModel {
     }
 
     if (update.white_ips != null) {
-      for (var key in update.white_ips.keys) {
-        white_ips[key] = update.white_ips[key];
+      for (var key in update.white_ips) {
+        if(!white_ips.contains(key)){
+          white_ips.add(key);
+        }
       }
     }
   }

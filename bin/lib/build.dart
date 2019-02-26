@@ -126,9 +126,9 @@ class Build {
           cache_home: config[PROP_CACHE_HOME],
           zkm_jar: config[PROP_ZKM_JAR],
           white_ips: config[PROP_WHITE_IPS]));
-
-      await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
     }
+
+    await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
 
     return env_config.toJson();
   }
@@ -211,7 +211,7 @@ class Build {
 
   static bool isWhiteIp(String ip) {
     if (env_config.white_ips.isNotEmpty) {
-      return env_config.white_ips.containsKey(ip);
+      return env_config.white_ips.contains(ip);
     } else {
       return true;
     }
