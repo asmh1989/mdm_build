@@ -18,8 +18,12 @@ import 'utils.dart';
 import 'constant.dart';
 import 'db.dart';
 
+DateTime _last_build = DateTime.now();
+
 void _doTimerWork() async {
-  Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
+  if(DateTime.now().difference(_last_build).inMinutes.abs() < 3) {
+    Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
+  }
   await Build.initConfig();
   await _clearCache();
   while (true) {
@@ -143,6 +147,7 @@ class Build {
 
   static void _build(BuildModel model) async {
     Utils.log('${model.build_id} .... 进入打包状态');
+    _last_build = DateTime.now();
     BaseFramework framework = _frameworks[model.params.framework];
     if (framework == null) {
       model.status =
