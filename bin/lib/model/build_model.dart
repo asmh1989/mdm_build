@@ -14,7 +14,7 @@ class BuildStatus {
   BuildStatus({this.code, this.msg});
 
   static BuildStatus newFailed(String msg) =>
-      new BuildStatus(code: 1, msg: msg);
+      new BuildStatus(code: failed.code, msg: msg);
 
   static final BuildStatus success = BuildStatus(code: 0, msg: '打包成功');
   static final BuildStatus failed = BuildStatus(code: 1, msg: '打包失败');
