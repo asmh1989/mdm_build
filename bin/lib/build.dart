@@ -214,7 +214,7 @@ class Build {
   }
 
   static Future getCount([int status]) async {
-    var w;
+    SelectorBuilder w;
     if (status != null) {
       w = where.eq(propCode, status);
     }

@@ -75,7 +75,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
       return shelf.Response.ok(Utils.ok({'data': data}));
     } else if (request.url.path == 'app/count') {
-      var status;
+      int status;
       if (request.url.query != null && request.url.query.isNotEmpty) {
         try {
           status = int.parse(request.url.query.split('=').last);

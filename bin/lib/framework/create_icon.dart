@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:image/image.dart';
-import '../utils.dart';
 
 class CreateIcon {
   static Map<String, int> icons = {
