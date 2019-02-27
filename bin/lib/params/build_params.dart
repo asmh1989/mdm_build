@@ -72,7 +72,7 @@ class AppInfo {
     source_url = json['source_url'];
 
     if (!RegexUtil.isURL(source_url)) {
-      throw new Exception('source_url 类型错误');
+      throw 'source_url 类型错误';
     }
 
     svn_version = json['svn_version'];
@@ -82,7 +82,7 @@ class AppInfo {
     app_icon = json['app_icon'] ?? '';
 
     if (app_icon.isNotEmpty && !RegexUtil.isURL(app_icon)) {
-      throw new Exception('app_icon 类型错误');
+      throw 'app_icon 类型错误';
     }
 
     meta = (json['meta'] ?? {})?.cast<String, String>();

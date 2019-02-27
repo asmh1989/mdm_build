@@ -49,7 +49,7 @@ class Utils {
       log('$url downloaded');
     } catch (e) {
       log(e);
-      throw new Exception('${url} 下载失败');
+      throw '${url} 下载失败';
     }
   }
 
@@ -74,11 +74,11 @@ class Utils {
 
       log('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
       if (result.exitCode != 0) {
-        throw new Exception('');
+        throw '';
       }
     } catch (e) {
       log(e);
-      throw new Exception('${url} git clone 失败');
+      throw '${url} git clone 失败';
     }
   }
 
@@ -102,11 +102,11 @@ class Utils {
       log('svn co ${url}, done  ${result.exitCode}, ${result.stderr}');
 
       if (result.exitCode != 0) {
-        throw new Exception('');
+        throw '';
       }
     } catch (e) {
       log(e);
-      throw new Exception('${url} svn checkout 失败');
+      throw '${url} svn checkout 失败';
     }
   }
 

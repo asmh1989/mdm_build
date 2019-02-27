@@ -123,7 +123,7 @@ class MDM4Framework implements BaseFramework {
     Utils.log(
         'copySrc in $source done,  code = ${result.exitCode}, ${result.stderr}');
     if (result.exitCode != 0) {
-      throw new Exception('copySrc error: ${result.exitCode}');
+      throw 'copySrc error: ${result.exitCode}';
     }
   }
 
@@ -198,7 +198,7 @@ class MDM4Framework implements BaseFramework {
         }
       }
     } else {
-      throw new Exception('$source 中未发现AndroidManifest.xml文件');
+      throw '$source 中未发现AndroidManifest.xml文件';
     }
   }
 
@@ -215,7 +215,7 @@ class MDM4Framework implements BaseFramework {
 
     if (result.exitCode != 0) {
       Utils.log(result.stderr);
-      throw new Exception('编译失败, ${result.stderr}');
+      throw '编译失败, ${result.stderr}';
     }
   }
 
@@ -225,7 +225,7 @@ class MDM4Framework implements BaseFramework {
     if (!File(releasePackage).existsSync()) {
       releasePackage = '$source/app/build/outputs/apk/release/app-release.apk';
       if (!File(releasePackage).existsSync()) {
-        throw new Exception('apk 包不见了');
+        throw 'apk 包不见了';
       }
     }
 
@@ -235,7 +235,7 @@ class MDM4Framework implements BaseFramework {
       Utils.log('发现重新签名脚步...');
       var result = await shell.run('sh $source/resign.sh');
       if (result.exitCode != 0) {
-        throw new Exception('重新签名失败');
+        throw '重新签名失败';
       }
     }
 
