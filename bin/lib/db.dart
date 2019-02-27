@@ -1,4 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
+
 import 'utils.dart';
 
 /// 数据库操作
@@ -7,14 +8,31 @@ class DBManager {
 
   static void connect() async {
     if (_db == null || _db.state != State.OPEN) {
-      _db = new Db('mongodb://127.0.0.1:27017/builder');
+      _db = Db('mongodb://127.0.0.1:27017/builder');
       await _db.open();
     }
   }
 
-  static Map<String, dynamic> updateDate(Map<String, dynamic> data) {
-    data['date'] = new DateTime.now();
-    return data;
+  static Future<int> count(String collection, [selector]) async {
+    await connect();
+    var coll = _db.collection(collection);
+    return coll.count(selector);
+  }
+
+  static Future<Stream<Map<String, dynamic>>> find(String collection,
+      [selector]) async {
+    await connect();
+    var coll = _db.collection(collection);
+
+    return await coll.find(selector);
+  }
+
+  static Future<Map<String, dynamic>> findOne(String collection,
+      [selector]) async {
+    await connect();
+    var coll = _db.collection(collection);
+
+    return await coll.findOne(selector);
   }
 
   static void save(String collection,
@@ -45,25 +63,8 @@ class DBManager {
     }
   }
 
-  static Future<Stream<Map<String, dynamic>>> find(String collection,
-      [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
-
-    return await coll.find(selector);
-  }
-
-  static Future<Map<String, dynamic>> findOne(String collection,
-      [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
-
-    return await coll.findOne(selector);
-  }
-
-  static Future<int> count(String collection, [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
-    return coll.count(selector);
+  static Map<String, dynamic> updateDate(Map<String, dynamic> data) {
+    data['date'] = DateTime.now();
+    return data;
   }
 }

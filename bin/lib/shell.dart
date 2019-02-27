@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:shell/shell.dart';
 
-import 'utils.dart';
 import 'model/config_model.dart';
+import 'utils.dart';
 
 class Shell2 {
   Shell _shell;
@@ -12,7 +13,7 @@ class Shell2 {
   Shell2({this.workDir, this.env}) {
     Map<String, String> config_env = envConfig.toJson2();
     config_env.addAll(env ?? {});
-    _shell = new Shell(workingDirectory: workDir, environment: config_env);
+    _shell = Shell(workingDirectory: workDir, environment: config_env);
   }
 
   Future run(String command, [String dir]) async {
@@ -22,7 +23,7 @@ class Shell2 {
 
     if (_file == null) {
       String path = Utils.cachePath + '/tmp/' + Utils.newKey() + '.sh';
-      _file = new File(path);
+      _file = File(path);
     }
 
     if (_file.existsSync()) {

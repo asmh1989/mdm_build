@@ -1,6 +1,6 @@
-import 'mdm4_framework.dart';
 import '../model/build_model.dart';
 import '../utils.dart';
+import 'mdm4_framework.dart';
 
 class NormalFramework extends MDM4Framework {
   @override

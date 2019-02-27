@@ -1,31 +1,17 @@
+import 'package:meta/meta.dart';
+
 import '../params/build_params.dart';
 
 const propBuildId = 'build_id';
+const propBuildTime = 'build_time';
 const propCode = 'code';
 const propMsg = 'msg';
 const propParams = 'params';
-const propBuildTime = 'build_time';
-
-class BuildStatus {
-  int code;
-
-  String msg;
-
-  BuildStatus({this.code, this.msg});
-
-  static BuildStatus newFailed(String msg) =>
-      new BuildStatus(code: failed.code, msg: msg);
-
-  static final BuildStatus success = BuildStatus(code: 0, msg: '打包成功');
-  static final BuildStatus failed = BuildStatus(code: 1, msg: '打包失败');
-  static final BuildStatus waiting = BuildStatus(code: 2, msg: '等待中');
-  static final BuildStatus building = BuildStatus(code: 3, msg: '编译中');
-}
 
 class BuildModel {
-  DateTime date = new DateTime.now();
+  DateTime date = DateTime.now();
 
-  String build_id;
+  final String build_id;
 
   BuildStatus status = BuildStatus.waiting;
 
@@ -33,18 +19,18 @@ class BuildModel {
 
   int build_time;
 
-  BuildModel({this.build_id, this.params, this.build_time = 0});
+  BuildModel({@required this.build_id, this.params, this.build_time = 0});
 
-  BuildModel.fromJson(Map<String, dynamic> json) {
+  BuildModel.fromJson(Map<String, dynamic> json)
+      : build_id = json[propBuildId] {
     date = json['date'];
     build_time = json[build_time] ?? 0;
     if (date == null) {
       date = DateTime.now();
     }
-    build_id = json[propBuildId];
     var info = json[propCode];
     if (info != null) {
-      status = BuildStatus(code: info, msg: json[propMsg]);
+      status = BuildStatus(info, json[propMsg]);
     } else {
       status = BuildStatus.waiting;
     }
@@ -53,7 +39,7 @@ class BuildModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['date'] = this.date;
     data[propBuildId] = this.build_id;
     data[propCode] = this.status?.code;
@@ -62,4 +48,19 @@ class BuildModel {
     data[propParams] = this.params?.toJson();
     return data;
   }
+}
+
+class BuildStatus {
+  static final success = const BuildStatus(0, '打包成功');
+  static final failed = const BuildStatus(1, '打包失败');
+  static final waiting = const BuildStatus(2, '等待中');
+  static final building = const BuildStatus(3, '编译中');
+
+  final int code;
+
+  final String msg;
+
+  const BuildStatus(this.code, this.msg);
+
+  BuildStatus.newFailed(String msg) : this(failed.code, msg);
 }

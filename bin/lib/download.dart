@@ -1,19 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:core';
-import 'package:shelf/shelf.dart' show Response, Request;
+import 'dart:io';
 
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:shelf/shelf.dart' show Response, Request;
 
 import 'utils.dart';
 
-final _defaultMimeTypeResolver = new MimeTypeResolver();
-
-DateTime toSecondResolution(DateTime dt) {
-  if (dt.millisecond == 0) return dt;
-  return dt.subtract(new Duration(milliseconds: dt.millisecond));
-}
+final _defaultMimeTypeResolver = MimeTypeResolver();
 
 FutureOr<Response> downloadStaticFile(Request request) async {
   MimeTypeResolver contentTypeResolver = _defaultMimeTypeResolver;
@@ -27,16 +22,21 @@ FutureOr<Response> downloadStaticFile(Request request) async {
   File file;
 
   if (entityType == FileSystemEntityType.file) {
-    file = new File(fsPath);
+    file = File(fsPath);
   }
 
   if (file == null) {
-    return new Response.notFound('Not Found');
+    return Response.notFound('Not Found');
   }
 
   return _handleFile(request, file, () async {
     return contentTypeResolver.lookup(file.path);
   }, build_id);
+}
+
+DateTime toSecondResolution(DateTime dt) {
+  if (dt.millisecond == 0) return dt;
+  return dt.subtract(Duration(milliseconds: dt.millisecond));
 }
 
 Future<Response> _handleFile(
@@ -48,7 +48,7 @@ Future<Response> _handleFile(
   if (ifModifiedSince != null) {
     var fileChangeAtSecResolution = toSecondResolution(stat.changed);
     if (!fileChangeAtSecResolution.isAfter(ifModifiedSince)) {
-      return new Response.notModified();
+      return Response.notModified();
     }
   }
 
@@ -60,5 +60,5 @@ Future<Response> _handleFile(
   var contentType = await getContentType();
   if (contentType != null) headers[HttpHeaders.contentTypeHeader] = contentType;
 
-  return new Response.ok(file.openRead(), headers: headers);
+  return Response.ok(file.openRead(), headers: headers);
 }

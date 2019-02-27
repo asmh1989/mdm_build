@@ -1,223 +1,20 @@
-import 'dart:io';
 import 'dart:async';
-import 'base.dart';
-import '../utils.dart';
-import '../db.dart';
-import '../constant.dart';
-import '../model/build_model.dart';
+import 'dart:io';
+
 import 'package:shell/shell.dart';
-import 'create_icon.dart';
 import 'package:xml/xml.dart';
+
+import '../constant.dart';
+import '../db.dart';
+import '../model/build_model.dart';
 import '../shell.dart';
-
-class UpdateAndroidManifest extends XmlTransformer {
-  Map<String, String> meta;
-
-  Map<String, String> attrs;
-
-  String version_code;
-  String version_name;
-
-  UpdateAndroidManifest(
-      {this.meta, this.attrs, this.version_name, this.version_code});
-
-  @override
-  XmlElement visitElement(XmlElement node) {
-    if (node.name.qualified == 'application') {
-      if (meta.isNotEmpty) {
-        node.children.removeWhere((XmlNode e) {
-          if (e.text == 'meta-data') {
-            for (var attr in e.attributes) {
-              if (meta[attr.name.qualified] != null) {
-                return true;
-              }
-            }
-          }
-          return false;
-        });
-
-        for (var key in meta.keys) {
-          var build = new XmlElement(XmlName.fromString('meta-data'));
-          build.attributes
-              .add(new XmlAttribute(XmlName.fromString('android:name'), key));
-          build.attributes.add(
-              new XmlAttribute(XmlName.fromString('android:value'), meta[key]));
-
-          node.children.add(build);
-        }
-      }
-
-      if (attrs.isNotEmpty) {
-        for (var key in attrs.keys) {
-          node.attributes
-              .removeWhere((XmlAttribute attr) => attr.name.qualified == key);
-          node.attributes.add(new XmlAttribute(XmlName(key), attrs[key]));
-        }
-      }
-
-      return new XmlElement(visit(node.name), node.attributes.map(visit),
-          node.children.map(visit));
-    } else if (node.name.qualified == 'manifest') {
-      if (version_name != null) {
-        node.attributes.removeWhere((XmlAttribute attr) =>
-            attr.name.qualified == 'android:versionName');
-        node.attributes.add(
-            new XmlAttribute(XmlName('android:versionName'), version_name));
-      }
-
-      if (version_code != null) {
-        node.attributes.removeWhere((XmlAttribute attr) =>
-            attr.name.qualified == 'android:versionCode');
-        node.attributes.add(
-            new XmlAttribute(XmlName('android:versionCode'), version_code));
-      }
-
-      return new XmlElement(visit(node.name), node.attributes.map(visit),
-          node.children.map(visit));
-    }
-    return super.visitElement(node);
-  }
-}
+import '../utils.dart';
+import 'base.dart';
+import 'create_icon.dart';
+import 'update_androidmanifest.dart';
 
 class MDM4Framework implements BaseFramework {
   String sourceName = 'source';
-
-  @override
-  String getName() {
-    return 'mdm_4';
-  }
-
-  String getTmpSrc(source) {
-    return '${source}/.gradle/project';
-  }
-
-  void preSource(BuildModel model, String appPath) async {
-    await Utils.clone(
-        url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
-        path: appPath,
-        branch: getName(),
-        name: sourceName);
-  }
-
-  void prepare(BuildModel model, String source) async {
-    /// 下载svn代码
-    var tmpSrc = getTmpSrc(source);
-
-    Directory dir = new Directory(tmpSrc);
-    if (dir.existsSync()) {
-      dir.deleteSync();
-    }
-    dir.createSync(recursive: true);
-
-    await Utils.svnCheckout(
-        url: model.params.app_info.source_url,
-        path: tmpSrc,
-        version: model.params.app_info.svn_version);
-
-    Shell shell = new Shell(workingDirectory: source);
-
-    String command = 'copySrc.sh $tmpSrc $source';
-    Utils.log('start run copySrc.sh in $source');
-    var result = await shell.run('sh', command.split(' '));
-
-    Utils.log(
-        'copySrc in $source done,  code = ${result.exitCode}, ${result.stderr}');
-    if (result.exitCode != 0) {
-      throw 'copySrc error: ${result.exitCode}';
-    }
-  }
-
-  void changeRes(BuildModel model, String path, String source) async {
-    String appIcon = '$path/appicon.png';
-
-    if (model.params.app_info.app_icon.isNotEmpty) {
-      await Utils.download(model.params.app_info.app_icon, appIcon);
-      CreateIcon.create(appIcon, '${source}/app/src/main/res');
-    }
-  }
-
-  void changeConfig(BuildModel model, String source) async {
-    var tmpSrc = getTmpSrc(source);
-    Shell2 shell = new Shell2(env: {'LANGUAGE': 'en_us'});
-
-    var app = model.params.app_info;
-    String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
-    final file = new File(manifestFilePath);
-    if (file.existsSync()) {
-      var meta = new Map<String, String>();
-
-      meta.addAll(app.meta);
-
-      if (Directory(tmpSrc).existsSync()) {
-        var svn_version = model.params.app_info.svn_version;
-        if (svn_version == null) {
-          var result = await shell.run(
-              "svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
-          svn_version = int.parse(result.stdout.toString().trim());
-        }
-        Utils.log('svn_version = $svn_version');
-        meta['svn-version'] = '$svn_version';
-      }
-
-      Map<String, String> attrs = new Map();
-
-      if (app.app_name != null && app.app_name.isNotEmpty) {
-        attrs['android:label'] = app.app_name;
-      }
-
-      if (app.app_icon != null && app.app_icon.isNotEmpty) {
-        attrs['android:icon'] = '@drawable/auto_build_icon';
-      }
-
-      var doc = parse(await file.readAsString());
-
-      var update = new UpdateAndroidManifest(
-              meta: meta,
-              attrs: attrs,
-              version_code: '${app.version_code}',
-              version_name: app.version_name)
-          .visit(doc);
-
-      await file.writeAsString(update.toString());
-
-      final propertiesFile = source + '/app/src/main/assets/config.properties';
-
-      /// 修改properties配置
-      if (new File(propertiesFile).existsSync()) {
-        new File(propertiesFile).createSync(recursive: true);
-      }
-      for (var key in model.params.app_config.keys) {
-        ProcessResult find =
-            await shell.run('cat $propertiesFile | grep ^$key=');
-        if (find.exitCode == 0) {
-          await shell.run(
-              'sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
-        } else {
-          await shell.run(
-              'echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
-        }
-      }
-    } else {
-      throw '$source 中未发现AndroidManifest.xml文件';
-    }
-  }
-
-  Future<void> realBuild(BuildModel model, String source) async {
-    var logPath = Utils.logPath(model.build_id);
-
-    Shell2 shell = new Shell2(workDir: source);
-    Utils.log('-----------------${model.build_id} 开始打包---------------------');
-    ProcessResult result =
-        await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
-    result =
-        await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
-    Utils.log('-----------------${model.build_id} 打包结束---------------------');
-
-    if (result.exitCode != 0) {
-      Utils.log(result.stderr);
-      throw '编译失败, ${result.stderr}';
-    }
-  }
 
   void afterBuild(BuildModel model, String source) async {
     var savePath = Utils.packagePath(model.build_id) + '.apk';
@@ -229,7 +26,7 @@ class MDM4Framework implements BaseFramework {
       }
     }
 
-    Shell2 shell = new Shell2(workDir: source);
+    Shell2 shell = Shell2(workDir: source);
 
     if (File('$source/resign.sh').existsSync()) {
       Utils.log('发现重新签名脚步...');
@@ -284,5 +81,142 @@ class MDM4Framework implements BaseFramework {
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
     });
+  }
+
+  void changeConfig(BuildModel model, String source) async {
+    var tmpSrc = getTmpSrc(source);
+    Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
+
+    var app = model.params.app_info;
+    String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
+    final file = File(manifestFilePath);
+    if (file.existsSync()) {
+      var meta = Map<String, String>();
+
+      meta.addAll(app.meta);
+
+      if (Directory(tmpSrc).existsSync()) {
+        var svn_version = model.params.app_info.svn_version;
+        if (svn_version == null) {
+          var result = await shell.run(
+              "svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
+          svn_version = int.parse(result.stdout.toString().trim());
+        }
+        Utils.log('svn_version = $svn_version');
+        meta['svn-version'] = '$svn_version';
+      }
+
+      Map<String, String> attrs = Map();
+
+      if (app.app_name != null && app.app_name.isNotEmpty) {
+        attrs['android:label'] = app.app_name;
+      }
+
+      if (app.app_icon != null && app.app_icon.isNotEmpty) {
+        attrs['android:icon'] = '@drawable/auto_build_icon';
+      }
+
+      var doc = parse(await file.readAsString());
+
+      var update = UpdateAndroidManifest(
+              meta: meta,
+              attrs: attrs,
+              version_code: '${app.version_code}',
+              version_name: app.version_name)
+          .visit(doc);
+
+      await file.writeAsString(update.toString());
+
+      final propertiesFile = source + '/app/src/main/assets/config.properties';
+
+      /// 修改properties配置
+      if (File(propertiesFile).existsSync()) {
+        File(propertiesFile).createSync(recursive: true);
+      }
+      for (var key in model.params.app_config.keys) {
+        ProcessResult find =
+            await shell.run('cat $propertiesFile | grep ^$key=');
+        if (find.exitCode == 0) {
+          await shell.run(
+              'sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
+        } else {
+          await shell.run(
+              'echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
+        }
+      }
+    } else {
+      throw '$source 中未发现AndroidManifest.xml文件';
+    }
+  }
+
+  void changeRes(BuildModel model, String path, String source) async {
+    String appIcon = '$path/appicon.png';
+
+    if (model.params.app_info.app_icon.isNotEmpty) {
+      await Utils.download(model.params.app_info.app_icon, appIcon);
+      CreateIcon.create(appIcon, '${source}/app/src/main/res');
+    }
+  }
+
+  @override
+  String getName() {
+    return 'mdm_4';
+  }
+
+  String getTmpSrc(source) {
+    return '${source}/.gradle/project';
+  }
+
+  void prepare(BuildModel model, String source) async {
+    /// 下载svn代码
+    var tmpSrc = getTmpSrc(source);
+
+    Directory dir = Directory(tmpSrc);
+    if (dir.existsSync()) {
+      dir.deleteSync();
+    }
+    dir.createSync(recursive: true);
+
+    await Utils.svnCheckout(
+        url: model.params.app_info.source_url,
+        path: tmpSrc,
+        version: model.params.app_info.svn_version);
+
+    Shell shell = Shell(workingDirectory: source);
+
+    String command = 'copySrc.sh $tmpSrc $source';
+    Utils.log('start run copySrc.sh in $source');
+    var result = await shell.run('sh', command.split(' '));
+
+    Utils.log(
+        'copySrc in $source done,  code = ${result.exitCode}, ${result.stderr}');
+    if (result.exitCode != 0) {
+      throw 'copySrc error: ${result.exitCode}';
+    }
+  }
+
+  void preSource(BuildModel model, String appPath) async {
+    await Utils.clone(
+        url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
+        path: appPath,
+        branch: getName(),
+        name: sourceName);
+  }
+
+  Future<void> realBuild(BuildModel model, String source) async {
+    var logPath = Utils.logPath(model.build_id);
+
+    Shell2 shell = Shell2(workDir: source);
+    Utils.log('-----------------${model.build_id} 开始打包---------------------');
+    ProcessResult result =
+        await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
+    result =
+        await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
+    Utils.log('-----------------${model.build_id} 打包结束---------------------');
+
+    if (result.exitCode != 0) {
+      Utils.log(result.stderr);
+      throw '编译失败, ${result.stderr}';
+    }
   }
 }

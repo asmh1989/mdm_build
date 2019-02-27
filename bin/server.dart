@@ -1,17 +1,16 @@
-import 'dart:io';
-
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 
-import 'lib/params/build_params.dart';
-import 'lib/db.dart';
 import 'lib/build.dart';
-import 'lib/utils.dart';
+import 'lib/db.dart';
 import 'lib/download.dart';
+import 'lib/params/build_params.dart';
+import 'lib/utils.dart';
 
 main(List<String> args) async {
   var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '7001');

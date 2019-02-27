@@ -1,36 +1,5 @@
 import 'package:common_utils/common_utils.dart';
 
-/// 打包请求参数解析
-class BuildParams {
-  /// 打包框架
-  String framework;
-
-  /// 应用信息
-  AppInfo app_info;
-
-  /// 应用配置
-  Map<String, dynamic> app_config;
-
-  BuildParams({this.framework, this.app_config, this.app_info});
-
-  BuildParams.fromJson(Map<String, dynamic> json) {
-    framework = json['framework'];
-    app_config = json['app_config'];
-    var info = json['app_info'];
-    if (info != null) {
-      app_info = AppInfo.fromJson(info);
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['framework'] = this.framework;
-    data['app_config'] = this.app_config;
-    data['app_info'] = this.app_info?.toJson();
-    return data;
-  }
-}
-
 class AppInfo {
   /// 项目名称
   String project_name;
@@ -89,7 +58,7 @@ class AppInfo {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['project_name'] = this.project_name;
     data['source_url'] = this.source_url;
     data['svn_version'] = this.svn_version;
@@ -98,6 +67,37 @@ class AppInfo {
     data['app_icon'] = this.app_icon;
     data['app_name'] = this.app_name;
     data['meta'] = this.meta;
+    return data;
+  }
+}
+
+/// 打包请求参数解析
+class BuildParams {
+  /// 打包框架
+  String framework;
+
+  /// 应用信息
+  AppInfo app_info;
+
+  /// 应用配置
+  Map<String, dynamic> app_config;
+
+  BuildParams({this.framework, this.app_config, this.app_info});
+
+  BuildParams.fromJson(Map<String, dynamic> json) {
+    framework = json['framework'];
+    app_config = json['app_config'];
+    var info = json['app_info'];
+    if (info != null) {
+      app_info = AppInfo.fromJson(info);
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['framework'] = this.framework;
+    data['app_config'] = this.app_config;
+    data['app_info'] = this.app_info?.toJson();
     return data;
   }
 }

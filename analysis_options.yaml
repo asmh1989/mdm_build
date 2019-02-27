@@ -10,6 +10,7 @@ linter:
   - library_names
   - file_names
   - library_prefixes
+  - directives_ordering
 
 analyzer:
 #   exclude:

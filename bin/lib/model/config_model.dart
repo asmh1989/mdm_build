@@ -1,15 +1,16 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import '../utils.dart';
 
-ConfigModel envConfig;
-
-const propMaxBuild = 'MAX_BUILD';
 const propAndroidHome = 'ANDROID_HOME';
-const propJavaHome = 'JAVA_HOME';
-const propZkmJar = 'ZKM_JAR';
+
 const propCacheHome = 'CACHE_HOME';
+const propJavaHome = 'JAVA_HOME';
+const propMaxBuild = 'MAX_BUILD';
 const propWhiteIps = 'WHITE_IPS';
+const propZkmJar = 'ZKM_JAR';
+ConfigModel envConfig;
 
 class ConfigModel {
   int max_build;
@@ -78,6 +79,28 @@ class ConfigModel {
     }
   }
 
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data[propMaxBuild] = max_build;
+    data[propAndroidHome] = android_home;
+    data[propJavaHome] = java_home;
+    data[propZkmJar] = zkm_jar;
+    data[propCacheHome] = cache_home;
+    data[propWhiteIps] = white_ips;
+    return data;
+  }
+
+  Map<String, String> toJson2() {
+    final Map<String, String> data = Map<String, String>();
+    data[propMaxBuild] = '$max_build';
+    data[propAndroidHome] = android_home;
+    data[propJavaHome] = java_home;
+    data[propZkmJar] = zkm_jar;
+    data[propCacheHome] = cache_home;
+    data[propWhiteIps] = json.encode(white_ips);
+    return data;
+  }
+
   void verify() async {
     if (cache_home != null && !cache_home.startsWith('/')) {
       cache_home = null;
@@ -114,27 +137,5 @@ class ConfigModel {
         zkm_jar = null;
       }
     }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data[propMaxBuild] = max_build;
-    data[propAndroidHome] = android_home;
-    data[propJavaHome] = java_home;
-    data[propZkmJar] = zkm_jar;
-    data[propCacheHome] = cache_home;
-    data[propWhiteIps] = white_ips;
-    return data;
-  }
-
-  Map<String, String> toJson2() {
-    final Map<String, String> data = new Map<String, String>();
-    data[propMaxBuild] = '$max_build';
-    data[propAndroidHome] = android_home;
-    data[propJavaHome] = java_home;
-    data[propZkmJar] = zkm_jar;
-    data[propCacheHome] = cache_home;
-    data[propWhiteIps] = json.encode(white_ips);
-    return data;
   }
 }

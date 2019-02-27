@@ -1,38 +1,21 @@
-import 'dart:io' show Platform, Directory;
 import 'dart:convert';
-import 'package:uuid/uuid.dart';
+import 'dart:io' show Platform, Directory;
+
 import 'package:dio/dio.dart';
 import 'package:shell/shell.dart';
+import 'package:uuid/uuid.dart';
 
 import 'model/config_model.dart';
 
 class Utils {
-  static Uuid _uuid = new Uuid();
+  static Uuid _uuid = Uuid();
 
-  static Dio _dio = new Dio();
-
-  static String get HOME =>
-      '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}';
+  static Dio _dio = Dio();
 
   static String get cachePath => envConfig.cache_home;
 
-  static String newKey() {
-    return _uuid.v1();
-  }
-
-  static String packagePath(String build_id) {
-    if (!Directory('$cachePath/packages').existsSync()) {
-      Directory('$cachePath/packages').createSync(recursive: true);
-    }
-    return '$cachePath/packages/$build_id';
-  }
-
-  static String logPath(String build_id) {
-    if (!Directory('$cachePath/logs').existsSync()) {
-      Directory('$cachePath/logs').createSync(recursive: true);
-    }
-    return '$cachePath/logs/$build_id.log';
-  }
+  static String get HOME =>
+      '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}';
 
   static String appPath(String build_id) {
     Directory dir = Directory('$cachePath/apps/$build_id');
@@ -42,23 +25,12 @@ class Utils {
     return dir.path;
   }
 
-  static Future<void> download(String url, String path) async {
-    try {
-      log('start download... $url to $path');
-      await _dio.download(url, path);
-      log('$url downloaded');
-    } catch (e) {
-      log(e);
-      throw '${url} 下载失败';
-    }
-  }
-
   static Future<void> clone(
       {String url, String branch, String path, String name}) async {
     try {
       log('start git clone ... $url to ${path ?? ''}/$name');
 
-      var shell = new Shell(workingDirectory: path ?? HOME);
+      var shell = Shell(workingDirectory: path ?? HOME);
 
       var list = ['clone', url];
       if (branch != null) {
@@ -82,11 +54,59 @@ class Utils {
     }
   }
 
+  static Future<void> download(String url, String path) async {
+    try {
+      log('start download... $url to $path');
+      await _dio.download(url, path);
+      log('$url downloaded');
+    } catch (e) {
+      log(e);
+      throw '${url} 下载失败';
+    }
+  }
+
+  static String error(Map res) {
+    return json.encode({'error': res}, toEncodable: myEncode);
+  }
+
+  static void log(var msg) {
+    print('${DateTime.now().toIso8601String()} ${msg.toString()}');
+  }
+
+  static String logPath(String build_id) {
+    if (!Directory('$cachePath/logs').existsSync()) {
+      Directory('$cachePath/logs').createSync(recursive: true);
+    }
+    return '$cachePath/logs/$build_id.log';
+  }
+
+  static dynamic myEncode(dynamic item) {
+    if (item is DateTime) {
+      return item.toIso8601String();
+    }
+    return item;
+  }
+
+  static String newKey() {
+    return _uuid.v1();
+  }
+
+  static String ok(Map res) {
+    return json.encode({'ok': res}, toEncodable: myEncode);
+  }
+
+  static String packagePath(String build_id) {
+    if (!Directory('$cachePath/packages').existsSync()) {
+      Directory('$cachePath/packages').createSync(recursive: true);
+    }
+    return '$cachePath/packages/$build_id';
+  }
+
   static Future svnCheckout({String url, int version, String path}) async {
     try {
       log('start svn co  ... $url:$version to $path');
 
-      var shell = new Shell(workingDirectory: path);
+      var shell = Shell(workingDirectory: path);
 
       String command =
           'co $url $path --username sunmh --password Justsy123 --no-auth-cache --non-interactive';
@@ -108,24 +128,5 @@ class Utils {
       log(e);
       throw '${url} svn checkout 失败';
     }
-  }
-
-  static dynamic myEncode(dynamic item) {
-    if (item is DateTime) {
-      return item.toIso8601String();
-    }
-    return item;
-  }
-
-  static String ok(Map res) {
-    return json.encode({'ok': res}, toEncodable: myEncode);
-  }
-
-  static String error(Map res) {
-    return json.encode({'error': res}, toEncodable: myEncode);
-  }
-
-  static void log(var msg) {
-    print('${DateTime.now().toIso8601String()} ${msg.toString()}');
   }
 }

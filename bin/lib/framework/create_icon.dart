@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:image/image.dart';
 
 class CreateIcon {
@@ -12,13 +13,13 @@ class CreateIcon {
 
   static void create(String file, String path) async {
 //    Utils.log('start decode $file');
-    Image image = decodeImage(await new File(file).readAsBytes());
+    Image image = decodeImage(await File(file).readAsBytes());
 //    Utils.log('decode $file done');
 
     for (String key in icons.keys) {
       String dir = '$path/$key';
       Directory(dir).createSync(recursive: true);
-      File file = new File('$dir/auto_build_icon.png');
+      File file = File('$dir/auto_build_icon.png');
 
 //      Utils.log('start new ${file.path}');
 
