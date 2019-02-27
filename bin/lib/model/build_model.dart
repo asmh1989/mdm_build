@@ -16,10 +16,10 @@ class BuildStatus {
   static BuildStatus newFailed(String msg) =>
       new BuildStatus(code: 1, msg: msg);
 
-  static BuildStatus success = BuildStatus(code: 0, msg: '打包成功');
-  static BuildStatus failed = BuildStatus(code: 1, msg: '打包失败');
-  static BuildStatus waiting = BuildStatus(code: 2, msg: '等待中');
-  static BuildStatus building = BuildStatus(code: 3, msg: '编译中');
+  static final BuildStatus success = BuildStatus(code: 0, msg: '打包成功');
+  static final BuildStatus failed = BuildStatus(code: 1, msg: '打包失败');
+  static final BuildStatus waiting = BuildStatus(code: 2, msg: '等待中');
+  static final BuildStatus building = BuildStatus(code: 3, msg: '编译中');
 }
 
 class BuildModel {
