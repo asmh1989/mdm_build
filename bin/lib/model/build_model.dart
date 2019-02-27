@@ -1,10 +1,10 @@
 import '../params/build_params.dart';
 
-const PROP_BUILD_ID = 'build_id';
-const PROP_CODE = 'code';
-const PROP_MSG = 'msg';
-const PROP_PARAMS = 'params';
-const PROP_BUILD_TIME = 'build_time';
+const propBuildId = 'build_id';
+const propCode = 'code';
+const propMsg = 'msg';
+const propParams = 'params';
+const propBuildTime = 'build_time';
 
 class BuildStatus {
   int code;
@@ -16,10 +16,10 @@ class BuildStatus {
   static BuildStatus newFailed(String msg) =>
       new BuildStatus(code: 1, msg: msg);
 
-  static BuildStatus get SUCCESS => new BuildStatus(code: 0, msg: '打包成功');
-  static BuildStatus get FAILED => new BuildStatus(code: 1, msg: '打包失败');
-  static BuildStatus get WAITING => new BuildStatus(code: 2, msg: '等待中');
-  static BuildStatus get BUILDING => new BuildStatus(code: 3, msg: '编译中');
+  static BuildStatus get success => new BuildStatus(code: 0, msg: '打包成功');
+  static BuildStatus get failed => new BuildStatus(code: 1, msg: '打包失败');
+  static BuildStatus get waiting => new BuildStatus(code: 2, msg: '等待中');
+  static BuildStatus get building => new BuildStatus(code: 3, msg: '编译中');
 }
 
 class BuildModel {
@@ -27,7 +27,7 @@ class BuildModel {
 
   String build_id;
 
-  BuildStatus status = BuildStatus.WAITING;
+  BuildStatus status = BuildStatus.waiting;
 
   BuildParams params;
 
@@ -41,25 +41,25 @@ class BuildModel {
     if (date == null) {
       date = DateTime.now();
     }
-    build_id = json[PROP_BUILD_ID];
-    var info = json[PROP_CODE];
+    build_id = json[propBuildId];
+    var info = json[propCode];
     if (info != null) {
-      status = BuildStatus(code: info, msg: json[PROP_MSG]);
+      status = BuildStatus(code: info, msg: json[propMsg]);
     } else {
-      status = BuildStatus.WAITING;
+      status = BuildStatus.waiting;
     }
 
-    params = BuildParams.fromJson(json[PROP_PARAMS] ?? {});
+    params = BuildParams.fromJson(json[propParams] ?? {});
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['date'] = this.date;
-    data[PROP_BUILD_ID] = this.build_id;
-    data[PROP_CODE] = this.status?.code;
-    data[PROP_MSG] = this.status?.msg;
-    data[PROP_BUILD_TIME] = this.build_time ?? 0;
-    data[PROP_PARAMS] = this.params?.toJson();
+    data[propBuildId] = this.build_id;
+    data[propCode] = this.status?.code;
+    data[propMsg] = this.status?.msg;
+    data[propBuildTime] = this.build_time ?? 0;
+    data[propParams] = this.params?.toJson();
     return data;
   }
 }

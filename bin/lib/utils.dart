@@ -14,7 +14,7 @@ class Utils {
   static String get HOME =>
       '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}';
 
-  static String get cachePath => env_config.cache_home;
+  static String get cachePath => envConfig.cache_home;
 
   static String newKey() {
     return _uuid.v1();

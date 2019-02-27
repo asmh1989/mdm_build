@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:path/path.dart' as P;
+import 'package:path/path.dart' as p;
 
 import 'framework/base.dart';
 
@@ -18,20 +18,20 @@ import 'utils.dart';
 import 'constant.dart';
 import 'db.dart';
 
-DateTime _last_build = DateTime.now();
+DateTime _lastBuildTime = DateTime.now();
 
 void _doTimerWork() async {
-  if (DateTime.now().difference(_last_build).inMinutes.abs() < 3) {
-    Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.TABLE_BUILD)}');
+  if (DateTime.now().difference(_lastBuildTime).inMinutes.abs() < 3) {
+    Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.tableBuild)}');
   }
   await Build.initConfig();
   await _clearCache();
   while (true) {
     int buildings = await DBManager.count(
-        Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
-    if (buildings < env_config.max_build) {
+        Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
+    if (buildings < envConfig.max_build) {
       var data = await DBManager.findOne(
-          Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.WAITING.code));
+          Constant.tableBuild, where.eq(propCode, BuildStatus.waiting.code));
 
       if (data != null && data.isNotEmpty) {
         BuildModel model = BuildModel.fromJson(data);
@@ -45,7 +45,7 @@ void _doTimerWork() async {
   }
 
   var builds = await DBManager.find(
-      Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
+      Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
   for (var data in await builds.toList()) {
     BuildModel model = BuildModel.fromJson(data);
     if (model.date.difference(DateTime.now()).inMinutes.abs() > 20) {
@@ -62,19 +62,19 @@ void _doTimerWork() async {
 }
 
 void _clearCache() async {
-  var appPath = P.normalize(Utils.appPath(''));
+  var appPath = p.normalize(Utils.appPath(''));
 
   Directory apps = new Directory(appPath);
 
   if (apps.existsSync()) {
     for (var file in apps.listSync()) {
-      var name = P.basename(file.path);
+      var name = p.basename(file.path);
       var data = await DBManager.findOne(
-          Constant.TABLE_BUILD, where.eq(PROP_BUILD_ID, name));
+          Constant.tableBuild, where.eq(propBuildId, name));
       bool willDel = false;
       if (data != null) {
         BuildModel model = BuildModel.fromJson(data);
-        if (model.status.code < BuildStatus.WAITING.code) {
+        if (model.status.code < BuildStatus.waiting.code) {
           willDel = true;
         }
       }
@@ -114,7 +114,7 @@ class Build {
     }
     await initConfig();
 
-    Utils.log('env_config: ${json.encode(env_config.toJson())}');
+    Utils.log('env_config: ${json.encode(envConfig.toJson())}');
 
     new Timer.periodic(new Duration(seconds: 60), (Timer t) => _doTimerWork());
 
@@ -122,41 +122,41 @@ class Build {
   }
 
   static Future<Map> initConfig([Map<String, dynamic> config]) async {
-    var data = await DBManager.findOne(Constant.TABLE_CONFIG);
-    env_config = ConfigModel.fromJson(data ?? {});
+    var data = await DBManager.findOne(Constant.tableConfig);
+    envConfig = ConfigModel.fromJson(data ?? {});
 
     if (data == null) {
-      await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
+      await DBManager.save(Constant.tableConfig, data: envConfig.toJson());
     }
 
     if (config != null) {
-      env_config.merge(new ConfigModel(
-          max_build: config[PROP_MAX_BUILD],
-          android_home: config[PROP_ANDROID_HOME],
-          java_home: config[PROP_JAVA_HOME],
-          cache_home: config[PROP_CACHE_HOME],
-          zkm_jar: config[PROP_ZKM_JAR],
-          white_ips: config[PROP_WHITE_IPS]));
-      Utils.log('env_config: ${json.encode(env_config.toJson())}');
-      await DBManager.save(Constant.TABLE_CONFIG, data: env_config.toJson());
+      envConfig.merge(new ConfigModel(
+          max_build: config[propMaxBuild],
+          android_home: config[propAndroidHome],
+          java_home: config[propJavaHome],
+          cache_home: config[propCacheHome],
+          zkm_jar: config[propZkmJar],
+          white_ips: config[propWhiteIps]));
+      Utils.log('env_config: ${json.encode(envConfig.toJson())}');
+      await DBManager.save(Constant.tableConfig, data: envConfig.toJson());
     }
 
-    return env_config.toJson();
+    return envConfig.toJson();
   }
 
   static void _build(BuildModel model) async {
     Utils.log('${model.build_id} .... 进入打包状态');
-    _last_build = DateTime.now();
+    _lastBuildTime = DateTime.now();
     BaseFramework framework = _frameworks[model.params.framework];
     if (framework == null) {
       model.status =
           BuildStatus.newFailed('不支持的 framework: ${model.params.framework}');
-      await DBManager.save(Constant.TABLE_BUILD,
-          id: PROP_BUILD_ID, data: model.toJson());
+      await DBManager.save(Constant.tableBuild,
+          id: propBuildId, data: model.toJson());
     } else {
-      model.status = BuildStatus.BUILDING;
-      await DBManager.save(Constant.TABLE_BUILD,
-          id: PROP_BUILD_ID, data: model.toJson());
+      model.status = BuildStatus.building;
+      await DBManager.save(Constant.tableBuild,
+          id: propBuildId, data: model.toJson());
       framework.build(model);
     }
   }
@@ -166,17 +166,17 @@ class Build {
 
     var model = new BuildModel(build_id: key, params: params);
 
-    await DBManager.save(Constant.TABLE_BUILD,
-        id: PROP_BUILD_ID, data: model.toJson());
+    await DBManager.save(Constant.tableBuild,
+        id: propBuildId, data: model.toJson());
 
     int now_builds = await DBManager.count(
-        Constant.TABLE_BUILD, where.eq(PROP_CODE, BuildStatus.BUILDING.code));
+        Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
 
-    if (now_builds < env_config.max_build) {
+    if (now_builds < envConfig.max_build) {
       await _build(model);
     } else {
       Utils.log(
-          '$key need waiting... building: $now_builds, max_build:${env_config.max_build}');
+          '$key need waiting... building: $now_builds, max_build:${envConfig.max_build}');
     }
 
     return key;
@@ -191,9 +191,9 @@ class Build {
 
     var mm = where.skip(page * pageSize).limit(pageSize);
     if (status != null) {
-      mm.eq(PROP_CODE, status);
+      mm.eq(propCode, status);
     }
-    var data = await DBManager.find(Constant.TABLE_BUILD, mm);
+    var data = await DBManager.find(Constant.tableBuild, mm);
 
     List<Map> list = [];
     for (var d in await data.toList()) {
@@ -204,8 +204,8 @@ class Build {
   }
 
   static Future getBuild(String id) async {
-    var data = await DBManager.findOne(
-        Constant.TABLE_BUILD, where.eq(PROP_BUILD_ID, id));
+    var data =
+        await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
       return BuildModel.fromJson(data).toJson();
     } else {
@@ -216,14 +216,14 @@ class Build {
   static Future getCount([int status]) async {
     var w;
     if (status != null) {
-      w = where.eq(PROP_CODE, status);
+      w = where.eq(propCode, status);
     }
-    return DBManager.count(Constant.TABLE_BUILD, w);
+    return DBManager.count(Constant.tableBuild, w);
   }
 
   static bool isWhiteIp(String ip) {
-    if (env_config.white_ips.isNotEmpty) {
-      return env_config.white_ips.contains(ip);
+    if (envConfig.white_ips.isNotEmpty) {
+      return envConfig.white_ips.contains(ip);
     } else {
       return true;
     }

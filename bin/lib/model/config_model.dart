@@ -2,15 +2,14 @@ import 'dart:io';
 import 'dart:convert';
 import '../utils.dart';
 
-ConfigModel env_config;
+ConfigModel envConfig;
 
-const PROP_MAX_BUILD = 'MAX_BUILD';
-const PROP_ANDROID_HOME = 'ANDROID_HOME';
-const PROP_JAVA_HOME = 'JAVA_HOME';
-const PROP_ZKM_JAR = 'ZKM_JAR';
-const PROP_CACHE_HOME = 'CACHE_HOME';
-
-const PROP_WHITE_IPS = 'WHITE_IPS';
+const propMaxBuild = 'MAX_BUILD';
+const propAndroidHome = 'ANDROID_HOME';
+const propJavaHome = 'JAVA_HOME';
+const propZkmJar = 'ZKM_JAR';
+const propCacheHome = 'CACHE_HOME';
+const propWhiteIps = 'WHITE_IPS';
 
 class ConfigModel {
   int max_build;
@@ -30,12 +29,12 @@ class ConfigModel {
       this.white_ips});
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
-    max_build = json[PROP_MAX_BUILD] ?? 3;
-    android_home = json[PROP_ANDROID_HOME] ?? '${Utils.HOME}/Android/Sdk';
-    java_home = json[PROP_JAVA_HOME] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
-    zkm_jar = json[PROP_ZKM_JAR] ?? '${Utils.HOME}/bin/ZKM.jar';
-    cache_home = json[PROP_CACHE_HOME] ?? '${Utils.HOME}/.mdm_build';
-    white_ips = json[PROP_WHITE_IPS] ?? [];
+    max_build = json[propMaxBuild] ?? 3;
+    android_home = json[propAndroidHome] ?? '${Utils.HOME}/Android/Sdk';
+    java_home = json[propJavaHome] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
+    zkm_jar = json[propZkmJar] ?? '${Utils.HOME}/bin/ZKM.jar';
+    cache_home = json[propCacheHome] ?? '${Utils.HOME}/.mdm_build';
+    white_ips = json[propWhiteIps] ?? [];
   }
 
   void merge(ConfigModel update) {
@@ -119,23 +118,23 @@ class ConfigModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data[PROP_MAX_BUILD] = max_build;
-    data[PROP_ANDROID_HOME] = android_home;
-    data[PROP_JAVA_HOME] = java_home;
-    data[PROP_ZKM_JAR] = zkm_jar;
-    data[PROP_CACHE_HOME] = cache_home;
-    data[PROP_WHITE_IPS] = white_ips;
+    data[propMaxBuild] = max_build;
+    data[propAndroidHome] = android_home;
+    data[propJavaHome] = java_home;
+    data[propZkmJar] = zkm_jar;
+    data[propCacheHome] = cache_home;
+    data[propWhiteIps] = white_ips;
     return data;
   }
 
   Map<String, String> toJson2() {
     final Map<String, String> data = new Map<String, String>();
-    data[PROP_MAX_BUILD] = '$max_build';
-    data[PROP_ANDROID_HOME] = android_home;
-    data[PROP_JAVA_HOME] = java_home;
-    data[PROP_ZKM_JAR] = zkm_jar;
-    data[PROP_CACHE_HOME] = cache_home;
-    data[PROP_WHITE_IPS] = json.encode(white_ips);
+    data[propMaxBuild] = '$max_build';
+    data[propAndroidHome] = android_home;
+    data[propJavaHome] = java_home;
+    data[propZkmJar] = zkm_jar;
+    data[propCacheHome] = cache_home;
+    data[propWhiteIps] = json.encode(white_ips);
     return data;
   }
 }

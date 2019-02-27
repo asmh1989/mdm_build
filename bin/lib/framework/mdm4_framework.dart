@@ -268,10 +268,10 @@ class MDM4Framework implements BaseFramework {
       /// 编译后处理
       await afterBuild(model, source);
 
-      model.status = BuildStatus.SUCCESS;
+      model.status = BuildStatus.success;
       model.build_time = DateTime.now().difference(build_time).inSeconds.abs();
-      await DBManager.save(Constant.TABLE_BUILD,
-          id: PROP_BUILD_ID, data: model.toJson());
+      await DBManager.save(Constant.tableBuild,
+          id: propBuildId, data: model.toJson());
       Utils.log('${model.build_id}, 打包结束.....');
     }
 
@@ -281,8 +281,8 @@ class MDM4Framework implements BaseFramework {
       Utils.log(e);
       print(stacks);
       model.status = BuildStatus.newFailed(e.toString());
-      await DBManager.save(Constant.TABLE_BUILD,
-          id: PROP_BUILD_ID, data: model.toJson());
+      await DBManager.save(Constant.tableBuild,
+          id: propBuildId, data: model.toJson());
     });
   }
 }
