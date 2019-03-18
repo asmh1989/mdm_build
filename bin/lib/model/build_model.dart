@@ -55,6 +55,7 @@ class BuildStatus {
   static final failed = const BuildStatus(1, '打包失败');
   static final waiting = const BuildStatus(2, '等待中');
   static final building = const BuildStatus(3, '编译中');
+  static final illegal = const BuildStatus(-1, "非法id");
 
   final int code;
 

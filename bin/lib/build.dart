@@ -101,9 +101,22 @@ class Build {
     var data =
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
-      return BuildModel.fromJson(data).toJson();
+      BuildModel model = BuildModel.fromJson(data);
+      return {
+        "status": model.status.code,
+        "msg": model.status.code == BuildStatus.failed.code
+            ? BuildStatus.failed.msg
+            : model.status.msg,
+        "detail": model.status.msg,
+        "downloadPath": model.status.code == BuildStatus.success.code
+            ? '/app/package/${model.build_id}.apk'
+            : ''
+      };
     } else {
-      return null;
+      return {
+        "status": BuildStatus.illegal.code,
+        "msg": BuildStatus.illegal.msg
+      };
     }
   }
 

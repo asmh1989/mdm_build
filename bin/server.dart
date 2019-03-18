@@ -86,9 +86,9 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
     } else if (request.url.path.startsWith('app/query/')) {
       var data = await Build.getBuild(request.url.pathSegments.last);
       if (data != null) {
-        return shelf.Response.ok(Utils.ok({'data': data}));
-      } else {
-        return shelf.Response.ok(Utils.error({'msg': '非法id'}));
+        return shelf.Response.ok(json.encode(data));
+//      } else {
+//        return shelf.Response.ok(Utils.error({'msg': '非法id'}));
       }
     } else if (request.url.path.startsWith('app/package/')) {
       return await downloadStaticFile(request);
