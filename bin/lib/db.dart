@@ -14,25 +14,40 @@ class DBManager {
   }
 
   static Future<int> count(String collection, [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
-    return coll.count(selector);
+    try {
+      await connect();
+      var coll = _db.collection(collection);
+      return coll.count(selector);
+    } catch (e) {
+      _db = null;
+      return -1;
+    }
   }
 
   static Future<Stream<Map<String, dynamic>>> find(String collection,
       [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
+    try {
+      await connect();
+      var coll = _db.collection(collection);
 
-    return await coll.find(selector);
+      return await coll.find(selector);
+    } catch (e) {
+      _db = null;
+      return null;
+    }
   }
 
   static Future<Map<String, dynamic>> findOne(String collection,
       [selector]) async {
-    await connect();
-    var coll = _db.collection(collection);
+    try {
+      await connect();
+      var coll = _db.collection(collection);
 
-    return await coll.findOne(selector);
+      return await coll.findOne(selector);
+    } catch (e) {
+      _db = null;
+      return null;
+    }
   }
 
   static void save(String collection,
@@ -54,16 +69,17 @@ class DBManager {
         for (String key in data.keys) {
           val[key] = data[key];
         }
-        await coll.save(updateDate(val));
+        await coll.save(_updateDate(val));
       } else {
-        await coll.insert(updateDate(data));
+        await coll.insert(_updateDate(data));
       }
     } catch (e) {
+      _db = null;
       Utils.log(e.toString());
     }
   }
 
-  static Map<String, dynamic> updateDate(Map<String, dynamic> data) {
+  static Map<String, dynamic> _updateDate(Map<String, dynamic> data) {
     data['date'] = DateTime.now();
     return data;
   }
