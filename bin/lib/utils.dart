@@ -122,11 +122,15 @@ class Utils {
       log('svn co ${url}, done  ${result.exitCode}, ${result.stderr}');
 
       if (result.exitCode != 0) {
-        throw '';
+        throw result.stderr;
       }
     } catch (e) {
       log(e);
-      throw '${url} svn checkout 失败';
+      if (e is String) {
+        rethrow;
+      } else {
+        throw '${url} svn checkout 失败';
+      }
     }
   }
 }

@@ -203,6 +203,18 @@ class Build {
     }
   }
 
+  static Future<bool> rebuild(String id) async {
+    var data =
+        await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
+    if (data != null) {
+      BuildModel model = BuildModel.fromJson(data);
+      _build(model);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static Future<String> start(BuildParams params) async {
     String key = Utils.newKey();
 

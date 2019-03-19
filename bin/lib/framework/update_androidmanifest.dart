@@ -16,13 +16,18 @@ class UpdateAndroidManifest extends XmlTransformer {
     if (node.name.qualified == 'application') {
       if (meta.isNotEmpty) {
         node.children.removeWhere((XmlNode e) {
-          if (e.text == 'meta-data') {
-            for (var attr in e.attributes) {
-              if (meta[attr.name.qualified] != null) {
-                return true;
+          if (e is XmlElement) {
+            XmlElement e2 = e;
+            if (e2.name.qualified == 'meta-data') {
+              for (var attr in e.attributes) {
+                if (attr.name.qualified == 'android:name' &&
+                    meta[attr.value] != null) {
+                  return true;
+                }
               }
             }
           }
+
           return false;
         });
 
