@@ -5,10 +5,13 @@ class AppInfo {
   String project_name;
 
   /// 仓库地址
-  String source_url;
+  String  source_url;
 
   /// svn版本号
   int svn_version;
+
+  /// git分支
+  String git_branch;
 
   /// 应用版本名称
   String version_name;
@@ -34,6 +37,7 @@ class AppInfo {
     this.app_icon,
     this.app_name,
     this.meta,
+    this.git_branch
   });
 
   AppInfo.fromJson(Map<String, dynamic> json) {
@@ -45,6 +49,7 @@ class AppInfo {
     }
 
     svn_version = json['svn_version'];
+    git_branch = json['git_branch'];
     version_name = json['version_name'];
     version_code = json['version_code'];
     app_name = json['app_name'];
@@ -62,6 +67,7 @@ class AppInfo {
     data['project_name'] = this.project_name;
     data['source_url'] = this.source_url;
     data['svn_version'] = this.svn_version;
+    data['git_branch'] = this.git_branch;
     data['version_code'] = this.version_code;
     data['version_name'] = this.version_name;
     data['app_icon'] = this.app_icon;

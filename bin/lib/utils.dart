@@ -33,7 +33,7 @@ class Utils {
       var shell = Shell(workingDirectory: path ?? HOME);
 
       var list = ['clone', url];
-      if (branch != null) {
+      if (branch != null && branch.isNotEmpty) {
         list.add('-b');
         list.add(branch);
       }
