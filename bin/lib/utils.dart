@@ -109,7 +109,7 @@ class Utils {
       var shell = Shell(workingDirectory: path);
 
       String command =
-          'co $url $path --username sunmh --password Justsy123 --no-auth-cache --non-interactive';
+          'co $url $path --username zhangjz --password zhangjz123abc --no-auth-cache --non-interactive';
 
       if (version != null) {
         command += ' -r $version';
