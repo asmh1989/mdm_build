@@ -197,7 +197,7 @@ class MDM4Framework implements BaseFramework {
 
   void preSource(BuildModel model, String appPath) async {
     await Utils.clone(
-        url: 'ssh://git@192.168.2.34:8442/sunmh/mdm_build.git',
+        url: 'ssh://git@android.justsafe.com:8442/sunmh/mdm_build.git',
         path: appPath,
         branch: getName(),
         name: sourceName);
