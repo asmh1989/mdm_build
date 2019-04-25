@@ -12,6 +12,7 @@ import 'framework/mdm41_framework.dart';
 import 'framework/mdm42_framework.dart';
 import 'framework/mdm4_framework.dart';
 import 'framework/normal_framework.dart';
+import 'framework/mdm_duoqi_framework.dart';
 import 'model/build_model.dart';
 import 'model/config_model.dart';
 import 'params/build_params.dart';
@@ -156,6 +157,7 @@ class Build {
       lists.add(MDM41Framework());
       lists.add(MDM42Framework());
       lists.add(NormalFramework());
+      lists.add(MDMDuoQiFramework());
 
       for (BaseFramework framework in lists) {
         _frameworks[framework.getName()] = framework;
