@@ -59,6 +59,9 @@ class MDM4Framework implements BaseFramework {
       /// 修改配置
       await changeConfig(model, source);
 
+      /// 删除version 配置
+      await changeBuildGradle(model, source);
+
       /// 开始编译
       await realBuild(model, source);
 
@@ -217,6 +220,20 @@ class MDM4Framework implements BaseFramework {
     if (result.exitCode != 0) {
       Utils.log(result.stderr);
       throw '编译失败, ${result.stderr}';
+    }
+  }
+
+  void changeBuildGradle(BuildModel model, String source) async {
+    Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
+
+    String buildGradlePath = source + '/app/build.gradle';
+    final file = File(buildGradlePath);
+    if (file.existsSync()) {
+      /// 删除versionCode
+      await shell.run("sed -i -e '/versionCode */d' $buildGradlePath");
+
+      /// 删除versionName
+      await shell.run("sed -i -e '/versionName */d' $buildGradlePath");
     }
   }
 }
