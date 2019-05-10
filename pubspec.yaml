@@ -12,10 +12,10 @@ dependencies:
   meta: ^1.1.7
   shelf: ^0.7.2
   common_utils: ^1.0.9
-  mongo_dart: ^0.3.4
-  uuid: ^1.0.3
+  mongo_dart: 0.3.5
+  uuid: ^2.0.1
   dio: ^2.0.4
-  image: 2.0.7
+  image: 2.0.8
   shell: 1.0.1
   xml: 3.4.1
   mime: ^0.9.6
