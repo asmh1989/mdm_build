@@ -5,7 +5,7 @@ description: A web server built using the shelf package.
 # author: sunmh <email@example.com>
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
   args: ^1.4.2
@@ -15,9 +15,9 @@ dependencies:
   mongo_dart: 0.3.5
   uuid: ^2.0.1
   dio: ^2.0.4
-  image: 2.0.8
+  image: ^2.0.9
   shell: 1.0.1
-  xml: 3.4.1
+  xml: ^3.5.0
   mime: ^0.9.6
 
 dev_dependencies:

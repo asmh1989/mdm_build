@@ -13,8 +13,8 @@ class NormalFramework extends MDM4Framework {
     var srcUrl = model.params.app_info.source_url;
 
     if (srcUrl != null && srcUrl.startsWith('ssh://')) {
-
-      await Utils.clone(url: srcUrl, name: source, branch: model.params.app_info.git_branch);
+      await Utils.clone(
+          url: srcUrl, name: source, branch: model.params.app_info.git_branch);
     } else {
       /// 下载svn代码
       await Utils.svnCheckout(

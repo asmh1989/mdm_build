@@ -55,7 +55,7 @@ class MDMDuoQiFramework extends MDM4Framework {
       var applicationName = 'unknown';
 
       var applicationElement =
-      doc.rootElement.findAllElements('application').toList()[0];
+          doc.rootElement.findAllElements('application').toList()[0];
       for (var attr in applicationElement.attributes) {
         if (attr.name.qualified == 'android:name') {
           applicationName = attr.value;
@@ -75,10 +75,10 @@ class MDMDuoQiFramework extends MDM4Framework {
       meta['APPLICATION_CLASS_NAME'] = applicationName;
 
       var update = UpdateAndroidManifest(
-          meta: meta,
-          attrs: attrs,
-          version_code: '${app.version_code}',
-          version_name: app.version_name)
+              meta: meta,
+              attrs: attrs,
+              version_code: '${app.version_code}',
+              version_name: app.version_name)
           .visit(doc);
 
       await file.writeAsString(update.toString());
@@ -91,7 +91,7 @@ class MDMDuoQiFramework extends MDM4Framework {
       }
       for (var key in model.params.app_config.keys) {
         ProcessResult find =
-        await shell.run('cat $propertiesFile | grep ^$key=');
+            await shell.run('cat $propertiesFile | grep ^$key=');
         if (find.exitCode == 0) {
           await shell.run(
               'sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');

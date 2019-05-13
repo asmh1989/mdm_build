@@ -5,7 +5,7 @@ class AppInfo {
   String project_name;
 
   /// 仓库地址
-  String  source_url;
+  String source_url;
 
   /// svn版本号
   int svn_version;
@@ -28,17 +28,16 @@ class AppInfo {
   /// meta-data参数配置
   Map<String, String> meta;
 
-  AppInfo({
-    this.project_name,
-    this.source_url,
-    this.svn_version,
-    this.version_code,
-    this.version_name,
-    this.app_icon,
-    this.app_name,
-    this.meta,
-    this.git_branch
-  });
+  AppInfo(
+      {this.project_name,
+      this.source_url,
+      this.svn_version,
+      this.version_code,
+      this.version_name,
+      this.app_icon,
+      this.app_name,
+      this.meta,
+      this.git_branch});
 
   AppInfo.fromJson(Map<String, dynamic> json) {
     project_name = json['project_name'];

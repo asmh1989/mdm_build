@@ -10,6 +10,7 @@ class Shell2 {
   File _file;
   final String workDir;
   final Map<String, String> env;
+
   Shell2({this.workDir, this.env}) {
     Map<String, String> config_env = envConfig.toJson2();
     config_env.addAll(env ?? {});
