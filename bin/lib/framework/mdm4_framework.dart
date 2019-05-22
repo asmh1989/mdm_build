@@ -107,6 +107,16 @@ class MDM4Framework implements BaseFramework {
         }
         Utils.log('svn_version = $svn_version');
         meta['svn-version'] = '$svn_version';
+      } else {
+        if(Directory(source +'/.git').existsSync()){
+          var result = await shell.run(
+              "git rev-parse HEAD", source);
+
+          var git_version = result.stdout.toString().trim();
+
+          Utils.log('git_version = $git_version');
+          meta['git-version'] = git_version;
+        }
       }
 
       Map<String, String> attrs = Map();
