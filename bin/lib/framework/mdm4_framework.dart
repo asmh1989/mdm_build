@@ -146,7 +146,8 @@ class MDM4Framework implements BaseFramework {
       if (File(propertiesFile).existsSync()) {
         File(propertiesFile).createSync(recursive: true);
       }
-      for (var key in model.params.app_config.keys) {
+
+      for (var key in (model.params.app_config??{}).keys) {
         ProcessResult find =
             await shell.run('cat $propertiesFile | grep ^$key=');
         if (find.exitCode == 0) {
