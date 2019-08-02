@@ -19,20 +19,20 @@ class MDM42Framework extends MDM4Framework {
     var tmpSrc = getTmpSrc(source);
     Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
 
-    var app = model.params.app_info;
+    var app = model.params;
     String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = File(manifestFilePath);
     if (file.existsSync()) {
       var meta = Map<String, String>();
 
-      meta.addAll(app.meta);
+      meta.addAll(app.configs.baseConfig.meta);
 
       if (Directory(tmpSrc).existsSync()) {
-        var svn_version = model.params.app_info.svn_version;
+        var svn_version = app.version.revision;
         if (svn_version == null) {
           var result = await shell.run(
               "svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
-          svn_version = int.parse(result.stdout.toString().trim());
+          svn_version = result.stdout.toString().trim();
         }
         Utils.log('svn_version = $svn_version');
         meta['svn-version'] = '$svn_version';
@@ -40,11 +40,13 @@ class MDM42Framework extends MDM4Framework {
 
       Map<String, String> attrs = Map();
 
-      if (app.app_name != null && app.app_name.isNotEmpty) {
-        attrs['android:label'] = app.app_name;
+      if (app.configs.baseConfig.appName != null &&
+          app.configs.baseConfig.appName.isNotEmpty) {
+        attrs['android:label'] = app.configs.baseConfig.appName;
       }
 
-      if (app.app_icon != null && app.app_icon.isNotEmpty) {
+      if (app.configs.baseConfig.appIcon != null &&
+          app.configs.baseConfig.appIcon.isNotEmpty) {
         attrs['android:icon'] = '@drawable/auto_build_icon';
       }
 
@@ -77,8 +79,8 @@ class MDM42Framework extends MDM4Framework {
       var update = UpdateAndroidManifest(
               meta: meta,
               attrs: attrs,
-              version_code: '${app.version_code}',
-              version_name: app.version_name)
+              version_code: '${app.version.versionCode}',
+              version_name: app.version.versionName)
           .visit(doc);
 
       await file.writeAsString(update.toString());
@@ -89,15 +91,15 @@ class MDM42Framework extends MDM4Framework {
       if (File(propertiesFile).existsSync()) {
         File(propertiesFile).createSync(recursive: true);
       }
-      for (var key in model.params.app_config.keys) {
+      for (var key in app.configs.appConfig.keys) {
         ProcessResult find =
             await shell.run('cat $propertiesFile | grep ^$key=');
         if (find.exitCode == 0) {
           await shell.run(
-              'sed -i /^$key=/c$key=${model.params.app_config[key]} $propertiesFile');
+              'sed -i /^$key=/c$key=${app.configs.appConfig[key]} $propertiesFile');
         } else {
           await shell.run(
-              'echo "$key=${model.params.app_config[key]}" >> $propertiesFile');
+              'echo "$key=${app.configs.appConfig[key]}" >> $propertiesFile');
         }
       }
     } else {

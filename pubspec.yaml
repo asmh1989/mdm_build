@@ -8,14 +8,14 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  args: ^1.4.2
+  args: ^1.5.2
   meta: ^1.1.7
-  shelf: ^0.7.2
+  shelf: ^0.7.5
   common_utils: ^1.0.9
   mongo_dart: 0.3.5
   uuid: ^2.0.1
   dio: ^2.0.4
-  image: ^2.0.9
+  image: ^2.1.4
   shell: 1.0.1
   xml: ^3.5.0
   mime: ^0.9.6

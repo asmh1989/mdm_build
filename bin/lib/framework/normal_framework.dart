@@ -1,4 +1,5 @@
 import '../model/build_model.dart';
+import '../params/build_params.dart';
 import '../utils.dart';
 import 'mdm4_framework.dart';
 
@@ -10,17 +11,18 @@ class NormalFramework extends MDM4Framework {
 
   @override
   void prepare(BuildModel model, String source) async {
-    var srcUrl = model.params.app_info.source_url;
+    Version version = model.params.version;
+    var srcUrl = version.sourceUrl;
 
-    if (srcUrl != null && srcUrl.startsWith('ssh://')) {
+    if (srcUrl != null && (srcUrl.startsWith('ssh://') || "git" == version.scm)) {
       await Utils.clone(
-          url: srcUrl, name: source, branch: model.params.app_info.git_branch);
+          url: srcUrl, name: source, branch: version.branch, commitId: version.revision);
     } else {
       /// 下载svn代码
       await Utils.svnCheckout(
-          url: model.params.app_info.source_url,
+          url: version.sourceUrl,
           path: source,
-          version: model.params.app_info.svn_version);
+          version: version.revision);
     }
   }
 

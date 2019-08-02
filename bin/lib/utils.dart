@@ -26,7 +26,11 @@ class Utils {
   }
 
   static Future<void> clone(
-      {String url, String branch, String path, String name}) async {
+      {String url,
+      String branch,
+      String path,
+      String name,
+      String commitId}) async {
     try {
       log('start git clone ... $url to ${path ?? ''}/$name');
 
@@ -42,11 +46,26 @@ class Utils {
         list.add(name);
       }
 
+      log('shell : git ${list.toString()}');
+
       var result = await shell.run('git', list);
 
       log('git clone ${url}, done  ${result.exitCode}, ${result.stderr}');
       if (result.exitCode != 0) {
-        throw '';
+        throw result.stderr;
+      } else {
+        if (commitId != null && commitId.isNotEmpty) {
+          list.clear();
+          list.add('checkout');
+          list.add(commitId);
+
+          Shell shell = Shell(workingDirectory: name);
+
+          result = await shell.run('git', list);
+          if (result.exitCode != 0) {
+            throw result.stderr;
+          }
+        }
       }
     } catch (e) {
       log(e);
@@ -102,7 +121,7 @@ class Utils {
     return '$cachePath/packages/$build_id';
   }
 
-  static Future svnCheckout({String url, int version, String path}) async {
+  static Future svnCheckout({String url, String version, String path}) async {
     try {
       log('start svn co  ... $url:$version to $path');
 

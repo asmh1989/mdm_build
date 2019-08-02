@@ -241,10 +241,10 @@ class Build {
   static void _build(BuildModel model) async {
     Utils.log('${model.build_id} .... 进入打包状态');
     _lastBuildTime = DateTime.now();
-    BaseFramework framework = _frameworks[model.params.framework];
+    BaseFramework framework = _frameworks[model.params.configs.framework];
     if (framework == null) {
-      model.status =
-          BuildStatus.newFailed('不支持的 framework: ${model.params.framework}');
+      model.status = BuildStatus.newFailed(
+          '不支持的 framework: ${model.params.configs.framework}');
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
     } else {

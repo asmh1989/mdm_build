@@ -1,60 +1,97 @@
 import 'package:common_utils/common_utils.dart';
 
-class AppInfo {
-  /// 项目名称
-  String project_name;
+/// 打包请求参数解析
+class BuildParams {
+  Version version;
+  Configs configs;
 
-  /// 仓库地址
-  String source_url;
+  BuildParams({this.version, this.configs});
 
-  /// svn版本号
-  int svn_version;
+  BuildParams.fromJson(Map<String, dynamic> json) {
+    version =
+        json['version'] != null ? Version.fromJson(json['version']) : null;
+    configs =
+        json['configs'] != null ? Configs.fromJson(json['configs']) : null;
+  }
 
-  /// git分支
-  String git_branch;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    if (this.version != null) {
+      data['version'] = this.version.toJson();
+    }
+    if (this.configs != null) {
+      data['configs'] = this.configs.toJson();
+    }
+    return data;
+  }
+}
 
-  /// 应用版本名称
-  String version_name;
+class Version {
+  String projectName;
+  String moduleName;
+  String scm;
+  String sourceUrl;
+  String branch;
+  String revision;
+  int versionCode;
+  String versionName;
 
-  /// 应用版本号
-  int version_code;
+  Version(
+      {this.projectName,
+      this.moduleName,
+      this.scm,
+      this.sourceUrl,
+      this.branch,
+      this.revision,
+      this.versionCode,
+      this.versionName});
 
-  /// 应用名称
-  String app_name;
+  Version.fromJson(Map<String, dynamic> json) {
+    projectName = json['project_name'];
+    moduleName = json['module_name'];
+    scm = json['scm'] ?? '';
+    scm = scm.toLowerCase();
 
-  /// 应用名称
-  String app_icon;
+    sourceUrl = json['source_url'];
+
+    if (!RegexUtil.isURL(sourceUrl)) {
+      throw 'source_url 类型错误';
+    }
+
+    branch = json['branch'];
+    revision = json['revision'];
+    versionCode = json['version_code'];
+    versionName = json['version_name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['project_name'] = this.projectName;
+    data['module_name'] = this.moduleName;
+    data['scm'] = this.scm;
+    data['source_url'] = this.sourceUrl;
+    data['branch'] = this.branch;
+    data['revision'] = this.revision;
+    data['version_code'] = this.versionCode;
+    data['version_name'] = this.versionName;
+    return data;
+  }
+}
+
+class BaseConfig {
+  String appName;
+  String appIcon;
 
   /// meta-data参数配置
   Map<String, String> meta;
 
-  AppInfo(
-      {this.project_name,
-      this.source_url,
-      this.svn_version,
-      this.version_code,
-      this.version_name,
-      this.app_icon,
-      this.app_name,
-      this.meta,
-      this.git_branch});
+  BaseConfig({this.appName, this.appIcon, this.meta});
 
-  AppInfo.fromJson(Map<String, dynamic> json) {
-    project_name = json['project_name'];
-    source_url = json['source_url'];
+  BaseConfig.fromJson(Map<String, dynamic> json) {
+    appName = json['app_name'] ?? '';
+    appIcon = json['app_icon'] ?? '';
 
-    if (!RegexUtil.isURL(source_url)) {
-      throw 'source_url 类型错误';
-    }
-
-    svn_version = json['svn_version'];
-    git_branch = json['git_branch'];
-    version_name = json['version_name'];
-    version_code = json['version_code'];
-    app_name = json['app_name'];
-    app_icon = json['app_icon'] ?? '';
-
-    if (app_icon.isNotEmpty && !RegexUtil.isURL(app_icon)) {
+    if (appIcon.isNotEmpty && !RegexUtil.isURL(appIcon)) {
       throw 'app_icon 类型错误';
     }
 
@@ -63,46 +100,42 @@ class AppInfo {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
-    data['project_name'] = this.project_name;
-    data['source_url'] = this.source_url;
-    data['svn_version'] = this.svn_version;
-    data['git_branch'] = this.git_branch;
-    data['version_code'] = this.version_code;
-    data['version_name'] = this.version_name;
-    data['app_icon'] = this.app_icon;
-    data['app_name'] = this.app_name;
-    data['meta'] = this.meta;
+    data['app_name'] = this.appName;
+    data['app_icon'] = this.appIcon;
+    if (this.meta != null) {
+      data['meta'] = this.meta;
+    }
     return data;
   }
 }
 
-/// 打包请求参数解析
-class BuildParams {
+class Configs {
   /// 打包框架
   String framework;
-
-  /// 应用信息
-  AppInfo app_info;
+  BaseConfig baseConfig;
 
   /// 应用配置
-  Map<String, dynamic> app_config;
+  Map<String, dynamic> appConfig;
 
-  BuildParams({this.framework, this.app_config, this.app_info});
+  Configs({this.framework, this.baseConfig, this.appConfig});
 
-  BuildParams.fromJson(Map<String, dynamic> json) {
+  Configs.fromJson(Map<String, dynamic> json) {
     framework = json['framework'];
-    app_config = json['app_config'];
-    var info = json['app_info'];
-    if (info != null) {
-      app_info = AppInfo.fromJson(info);
-    }
+    baseConfig = json['base_config'] != null
+        ? BaseConfig.fromJson(json['base_config'])
+        : BaseConfig.fromJson({});
+    appConfig = json['app_config'] ?? {};
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['framework'] = this.framework;
-    data['app_config'] = this.app_config;
-    data['app_info'] = this.app_info?.toJson();
+    if (this.baseConfig != null) {
+      data['base_config'] = this.baseConfig.toJson();
+    }
+    if (this.appConfig != null) {
+      data['app_config'] = this.appConfig;
+    }
     return data;
   }
 }
