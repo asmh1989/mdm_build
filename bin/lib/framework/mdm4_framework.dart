@@ -109,9 +109,8 @@ class MDM4Framework implements BaseFramework {
         Utils.log('svn_version = $svn_version');
         meta['svn-version'] = '$svn_version';
       } else {
-        if(Directory(source +'/.git').existsSync()){
-          var result = await shell.run(
-              "git rev-parse HEAD", source);
+        if (Directory(source + '/.git').existsSync()) {
+          var result = await shell.run("git rev-parse HEAD", source);
 
           var git_version = result.stdout.toString().trim();
 
@@ -123,11 +122,11 @@ class MDM4Framework implements BaseFramework {
       Map<String, String> attrs = Map();
       BaseConfig baseConfig = app.configs.baseConfig;
 
-      if (baseConfig.appName != null && baseConfig.appName.isNotEmpty) {
-        attrs['android:label'] = app.configs.baseConfig.appName;
+      if (baseConfig.appName.isNotEmpty) {
+        attrs['android:label'] = baseConfig.appName;
       }
 
-      if (baseConfig.appIcon != null && baseConfig.appIcon.isNotEmpty) {
+      if (baseConfig.appIcon.isNotEmpty) {
         attrs['android:icon'] = '@drawable/auto_build_icon';
       }
 
@@ -149,7 +148,7 @@ class MDM4Framework implements BaseFramework {
         File(propertiesFile).createSync(recursive: true);
       }
 
-      for (var key in (app.configs.appConfig??{}).keys) {
+      for (var key in (app.configs.appConfig ?? {}).keys) {
         ProcessResult find =
             await shell.run('cat $propertiesFile | grep ^$key=');
         if (find.exitCode == 0) {

@@ -10,8 +10,9 @@ class BuildParams {
   BuildParams.fromJson(Map<String, dynamic> json) {
     version =
         json['version'] != null ? Version.fromJson(json['version']) : null;
-    configs =
-        json['configs'] != null ? Configs.fromJson(json['configs']) : null;
+    configs = json['configs'] != null
+        ? Configs.fromJson(json['configs'])
+        : Configs.fromJson({});
   }
 
   Map<String, dynamic> toJson() {

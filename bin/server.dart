@@ -78,7 +78,9 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
       if (request.url.query != null && request.url.query.isNotEmpty) {
         try {
           status = int.parse(request.url.query.split('=').last);
-        } catch (e) {}
+        } catch (e) {
+          Utils.log('error : ' + e);
+        }
       }
 
       return shelf.Response.ok(
