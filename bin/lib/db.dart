@@ -8,7 +8,7 @@ class DBManager {
 
   static void connect() async {
     if (_db == null || _db.state != State.OPEN) {
-      _db = Db('mongodb://127.0.0.1:27017/builder');
+      _db = Db('mongodb://127.0.0.1:27017/build_data');
       await _db.open();
     }
   }
