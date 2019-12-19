@@ -195,7 +195,7 @@ class MDM4Framework implements BaseFramework {
     await Utils.svnCheckout(
         url: model.params.version.sourceUrl,
         path: tmpSrc,
-        version: model.params.version.branch);
+        version: model.params.version.revision);
 
     Shell shell = Shell(workingDirectory: source);
 
