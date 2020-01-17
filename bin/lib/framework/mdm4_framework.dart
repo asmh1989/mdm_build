@@ -144,7 +144,7 @@ class MDM4Framework implements BaseFramework {
       final propertiesFile = source + '/app/src/main/assets/config.properties';
 
       /// 修改properties配置
-      if (File(propertiesFile).existsSync()) {
+      if (!File(propertiesFile).existsSync()) {
         File(propertiesFile).createSync(recursive: true);
       }
 
