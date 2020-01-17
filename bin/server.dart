@@ -41,6 +41,10 @@ main(List<String> args) async {
   Utils.log('Serving at http://${server.address.host}:${server.port}');
 }
 
+FutureOr<shelf.Response> ok(FutureOr<String> content){
+  return shelf.Response.ok(content, headers: {'Content-Type': 'application/json'});
+}
+
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
   var connectionInfo =
   request.context['shelf.io.connection_info'] as HttpConnectionInfo;
@@ -72,7 +76,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
           page: params['page'],
           pageSize: params['pageSize']);
 
-      return shelf.Response.ok(Utils.ok({'data': data}));
+      return ok(Utils.ok({'data': data}));
     } else if (request.url.path == 'app/count') {
       int status;
       if (request.url.query != null && request.url.query.isNotEmpty) {
@@ -83,16 +87,16 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         }
       }
 
-      return shelf.Response.ok(
+      return ok(
           Utils.ok({'data': await Build.getCount(status)}));
     } else if (request.url.path.startsWith('app/query/')) {
       var data = await Build.getBuild(request.url.pathSegments.last);
-      return shelf.Response.ok(json.encode(data ?? {}));
+      return ok(json.encode(data ?? {}));
     } else if (request.url.path.startsWith('app/package/')) {
       return await downloadStaticFile(request);
     } else if (request.url.path.startsWith('app/rebuild/')) {
       var result = await Build.rebuild(request.url.pathSegments.last);
-      return shelf.Response.ok(result ? 'ok' : 'error');
+      return ok(result ? 'ok' : 'error');
     } else {
       return shelf.Response.forbidden('forbidden for "${request.url}"');
     }
@@ -107,18 +111,18 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         String key = await Build.start(params);
 
 //        Utils.log('body : ${json.encode(params.toJson())}');
-        return shelf.Response.ok(Utils.ok({'id': key}));
+        return ok(Utils.ok({'id': key}));
       } else if (request.url.path == 'config/sun') {
-        return shelf.Response.ok(
+        return ok(
             Utils.ok({'env': await Build.initConfig(body)}));
       }
     } catch (e) {
       Utils.log(e.toString());
-      return shelf.Response.ok(Utils.error({'msg': e.toString()}));
+      return ok(Utils.error({'msg': e.toString()}));
     }
 
     return shelf.Response.forbidden('forbidden for "${request.url}"');
   } else {
-    return shelf.Response.ok('Request for "${request.url}"');
+    return ok('Request for "${request.url}"');
   }
 }
