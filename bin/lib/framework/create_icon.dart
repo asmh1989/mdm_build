@@ -23,8 +23,7 @@ class CreateIcon {
 
 //      Utils.log('start new ${file.path}');
 
-      var thumbnail =
-          copyResize(image, height: icons[key], width: icons[key]);
+      var thumbnail = copyResize(image, height: icons[key], width: icons[key]);
 
       await file.writeAsBytes(encodePng(thumbnail));
 //      Utils.log('done new ${file.path}');

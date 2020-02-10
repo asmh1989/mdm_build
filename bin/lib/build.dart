@@ -128,7 +128,10 @@ class Build {
 
     if (pageSize < 1) pageSize = 1;
 
-    var mm = where.skip(page * pageSize).limit(pageSize).sortBy('date', descending: true);
+    var mm = where
+        .skip(page * pageSize)
+        .limit(pageSize)
+        .sortBy('date', descending: true);
     if (status != null) {
       mm.eq(propCode, status);
     }

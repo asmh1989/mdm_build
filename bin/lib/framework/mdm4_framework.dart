@@ -118,7 +118,7 @@ class MDM4Framework implements BaseFramework {
         }
       }
 
-      var attrs =<String, String>{};
+      var attrs = <String, String>{};
       var baseConfig = app.configs.baseConfig;
 
       if (baseConfig.appName.isNotEmpty) {

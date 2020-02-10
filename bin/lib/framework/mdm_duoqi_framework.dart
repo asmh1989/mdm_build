@@ -40,11 +40,13 @@ class MDMDuoQiFramework extends MDM4Framework {
 
       var attrs = {};
 
-      if (app.configs.baseConfig.appName != null && app.configs.baseConfig.appName .isNotEmpty) {
-        attrs['android:label'] = app.configs.baseConfig.appName ;
+      if (app.configs.baseConfig.appName != null &&
+          app.configs.baseConfig.appName.isNotEmpty) {
+        attrs['android:label'] = app.configs.baseConfig.appName;
       }
 
-      if (app.configs.baseConfig.appIcon  != null && app.configs.baseConfig.appIcon .isNotEmpty) {
+      if (app.configs.baseConfig.appIcon != null &&
+          app.configs.baseConfig.appIcon.isNotEmpty) {
         attrs['android:icon'] = '@drawable/auto_build_icon';
       }
 
