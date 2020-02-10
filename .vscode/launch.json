@@ -8,7 +8,7 @@
             "name": "Dart",
             "program": "bin/server.dart",
             "request": "launch",
-            "args": ["-p", "7004"],
+            "args": ["-p", "7005"],
             "type": "dart"
         }
     ]

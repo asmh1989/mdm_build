@@ -121,7 +121,7 @@ class Build {
     }
   }
 
-  static Future<List<Map>> getBuilds(
+  static dynamic getBuilds(
       {int status, int page = 0, int pageSize = 20}) async {
     page ??= 0;
     pageSize ??= 20;
