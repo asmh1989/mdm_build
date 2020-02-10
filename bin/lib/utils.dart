@@ -8,9 +8,9 @@ import 'package:uuid/uuid.dart';
 import 'model/config_model.dart';
 
 class Utils {
-  static Uuid _uuid = Uuid();
+  static final Uuid _uuid = Uuid();
 
-  static Dio _dio = Dio();
+  static final Dio _dio = Dio();
 
   static String get cachePath => envConfig.cache_home;
 
@@ -18,7 +18,7 @@ class Utils {
       '${Platform.environment['HOME'] ?? Platform.environment['USERPROFILE']}';
 
   static String appPath(String build_id) {
-    Directory dir = Directory('$cachePath/apps/$build_id');
+    var dir = Directory('$cachePath/apps/$build_id');
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
@@ -59,7 +59,7 @@ class Utils {
           list.add('checkout');
           list.add(commitId);
 
-          Shell shell = Shell(workingDirectory: name);
+          var shell = Shell(workingDirectory: name);
 
           result = await shell.run('git', list);
           if (result.exitCode != 0) {
@@ -127,14 +127,14 @@ class Utils {
 
       var shell = Shell(workingDirectory: path);
 
-      String command =
+      var command =
           'co $url $path --username zhangjz --password zhangjz123abc --no-auth-cache --non-interactive';
 
       if (version != null) {
         command += ' -r $version';
       }
 
-      List<String> commands = command.split(' ');
+      var commands = command.split(' ');
 
       var result = await shell.run('svn', commands);
 

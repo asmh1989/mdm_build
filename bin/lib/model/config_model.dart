@@ -80,7 +80,7 @@ class ConfigModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final data = <String, dynamic>{};
     data[propMaxBuild] = max_build;
     data[propAndroidHome] = android_home;
     data[propJavaHome] = java_home;
@@ -91,7 +91,7 @@ class ConfigModel {
   }
 
   Map<String, String> toJson2() {
-    final Map<String, String> data = Map<String, String>();
+    final data = <String, String>{};
     data[propMaxBuild] = '$max_build';
     data[propAndroidHome] = android_home;
     data[propJavaHome] = java_home;
@@ -108,7 +108,7 @@ class ConfigModel {
 
     if (android_home != null) {
       if (android_home.startsWith('/')) {
-        File adb = File('$android_home/platform-tools/adb');
+        var adb = File('$android_home/platform-tools/adb');
         if (!adb.existsSync()) {
           android_home = null;
         }
@@ -119,7 +119,7 @@ class ConfigModel {
 
     if (java_home != null) {
       if (java_home.startsWith('/')) {
-        File java = File('$java_home/bin/java');
+        var java = File('$java_home/bin/java');
         if (!java.existsSync()) {
           java_home = null;
         }

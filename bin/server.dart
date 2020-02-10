@@ -12,7 +12,7 @@ import 'lib/download.dart';
 import 'lib/params/build_params.dart';
 import 'lib/utils.dart';
 
-main(List<String> args) async {
+void main(List<String> args) async {
   var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '7001');
 
   var result = parser.parse(args);
@@ -41,13 +41,14 @@ main(List<String> args) async {
   Utils.log('Serving at http://${server.address.host}:${server.port}');
 }
 
-FutureOr<shelf.Response> ok(FutureOr<String> content){
-  return shelf.Response.ok(content, headers: {'Content-Type': 'application/json'});
+FutureOr<shelf.Response> ok(FutureOr<String> content) {
+  return shelf.Response.ok(content,
+      headers: {'Content-Type': 'application/json'});
 }
 
 FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
   var connectionInfo =
-  request.context['shelf.io.connection_info'] as HttpConnectionInfo;
+      request.context['shelf.io.connection_info'] as HttpConnectionInfo;
 
   var ip = connectionInfo.remoteAddress.address;
 
@@ -57,7 +58,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
   if (request.method == 'GET') {
     if (request.url.path == 'app/query') {
-      Map<String, dynamic> params = {};
+      var params = {};
 
       try {
         if (request.url.query != null && request.url.query.isNotEmpty) {
@@ -69,7 +70,9 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
             }
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        Utils.log('error : ' + e);
+      }
 
       var data = await Build.getBuilds(
           status: params['status'],
@@ -87,8 +90,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         }
       }
 
-      return ok(
-          Utils.ok({'data': await Build.getCount(status)}));
+      return ok(Utils.ok({'data': await Build.getCount(status)}));
     } else if (request.url.path.startsWith('app/query/')) {
       var data = await Build.getBuild(request.url.pathSegments.last);
       return ok(json.encode(data ?? {}));
@@ -106,15 +108,14 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
       /// 打包请求
       if (request.url.path == 'app/build') {
-        BuildParams params = BuildParams.fromJson(body);
+        var params = BuildParams.fromJson(body);
 
-        String key = await Build.start(params);
+        var key = await Build.start(params);
 
 //        Utils.log('body : ${json.encode(params.toJson())}');
         return ok(Utils.ok({'id': key}));
       } else if (request.url.path == 'config/sun') {
-        return ok(
-            Utils.ok({'env': await Build.initConfig(body)}));
+        return ok(Utils.ok({'env': await Build.initConfig(body)}));
       }
     } catch (e) {
       Utils.log(e.toString());

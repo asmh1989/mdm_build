@@ -16,12 +16,12 @@ class BuildParams {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    if (this.version != null) {
-      data['version'] = this.version.toJson();
+    final data = <String, dynamic>{};
+    if (version != null) {
+      data['version'] = version.toJson();
     }
-    if (this.configs != null) {
-      data['configs'] = this.configs.toJson();
+    if (configs != null) {
+      data['configs'] = configs.toJson();
     }
     return data;
   }
@@ -66,15 +66,15 @@ class Version {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['project_name'] = this.projectName;
-    data['module_name'] = this.moduleName;
-    data['scm'] = this.scm;
-    data['source_url'] = this.sourceUrl;
-    data['branch'] = this.branch;
-    data['revision'] = this.revision;
-    data['version_code'] = this.versionCode;
-    data['version_name'] = this.versionName;
+    final data = <String, dynamic>{};
+    data['project_name'] = projectName;
+    data['module_name'] = moduleName;
+    data['scm'] = scm;
+    data['source_url'] = sourceUrl;
+    data['branch'] = branch;
+    data['revision'] = revision;
+    data['version_code'] = versionCode;
+    data['version_name'] = versionName;
     return data;
   }
 }
@@ -100,11 +100,11 @@ class BaseConfig {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['app_name'] = this.appName;
-    data['app_icon'] = this.appIcon;
-    if (this.meta != null) {
-      data['meta'] = this.meta;
+    var data = <String, dynamic>{};
+    data['app_name'] = appName;
+    data['app_icon'] = appIcon;
+    if (meta != null) {
+      data['meta'] = meta;
     }
     return data;
   }
@@ -129,13 +129,13 @@ class Configs {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['framework'] = this.framework;
-    if (this.baseConfig != null) {
-      data['base_config'] = this.baseConfig.toJson();
+    final data = <String, dynamic>{};
+    data['framework'] = framework;
+    if (baseConfig != null) {
+      data['base_config'] = baseConfig.toJson();
     }
-    if (this.appConfig != null) {
-      data['app_config'] = this.appConfig;
+    if (appConfig != null) {
+      data['app_config'] = appConfig;
     }
     return data;
   }

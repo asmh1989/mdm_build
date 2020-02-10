@@ -12,7 +12,7 @@ class Shell2 {
   final Map<String, String> env;
 
   Shell2({this.workDir, this.env}) {
-    Map<String, String> config_env = envConfig.toJson2();
+    var config_env = envConfig.toJson2();
     config_env.addAll(env ?? {});
     _shell = Shell(workingDirectory: workDir, environment: config_env);
   }
@@ -23,7 +23,7 @@ class Shell2 {
     }
 
     if (_file == null) {
-      String path = Utils.cachePath + '/tmp/' + Utils.newKey() + '.sh';
+      var path = Utils.cachePath + '/tmp/' + Utils.newKey() + '.sh';
       _file = File(path);
     }
 

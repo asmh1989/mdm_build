@@ -23,16 +23,16 @@ DateTime _lastBuildTime = DateTime.now();
 void _clearCache() async {
   var appPath = p.normalize(Utils.appPath(''));
 
-  Directory apps = Directory(appPath);
+  var apps = Directory(appPath);
 
   if (apps.existsSync()) {
     for (var file in apps.listSync()) {
       var name = p.basename(file.path);
       var data = await DBManager.findOne(
           Constant.tableBuild, where.eq(propBuildId, name));
-      bool willDel = false;
+      var willDel = false;
       if (data != null) {
-        BuildModel model = BuildModel.fromJson(data);
+        var model = BuildModel.fromJson(data);
         if (model.status.code < BuildStatus.waiting.code) {
           willDel = true;
         }
@@ -59,14 +59,14 @@ void _doTimerWork() async {
   await Build.initConfig();
   await _clearCache();
   while (true) {
-    int buildings = await DBManager.count(
+    var buildings = await DBManager.count(
         Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
     if (buildings < envConfig.max_build) {
       var data = await DBManager.findOne(
           Constant.tableBuild, where.eq(propCode, BuildStatus.waiting.code));
 
       if (data != null && data.isNotEmpty) {
-        BuildModel model = BuildModel.fromJson(data);
+        var model = BuildModel.fromJson(data);
         await Build._build(model);
       } else {
         break;
@@ -79,11 +79,11 @@ void _doTimerWork() async {
   var builds = await DBManager.find(
       Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
   for (var data in await builds.toList()) {
-    BuildModel model = BuildModel.fromJson(data);
+    var model = BuildModel.fromJson(data);
     if (model.date.difference(DateTime.now()).inMinutes.abs() > 20) {
       Utils.log(
           '发现异常的打包记录, ${model.build_id}, date: ${model.date.toIso8601String()}');
-      Directory app = Directory(Utils.appPath(model.build_id));
+      var app = Directory(Utils.appPath(model.build_id));
       if (app.existsSync()) {
         app.deleteSync(recursive: true);
       }
@@ -96,35 +96,35 @@ void _doTimerWork() async {
 class Build {
   static int MAX_BUILDS = 3000;
 
-  static Map<String, BaseFramework> _frameworks = Map();
+  static final Map<String, BaseFramework> _frameworks = {};
 
   static Future getBuild(String id) async {
     var data =
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
-      BuildModel model = BuildModel.fromJson(data);
+      var model = BuildModel.fromJson(data);
       return {
-        "status": model.status.code,
-        "msg": model.status.code == BuildStatus.failed.code
+        'status': model.status.code,
+        'msg': model.status.code == BuildStatus.failed.code
             ? BuildStatus.failed.msg
             : model.status.msg,
-        "detail": model.status.msg,
-        "downloadPath": model.status.code == BuildStatus.success.code
+        'detail': model.status.msg,
+        'downloadPath': model.status.code == BuildStatus.success.code
             ? '/app/package/${model.build_id}.apk'
             : ''
       };
     } else {
       return {
-        "status": BuildStatus.illegal.code,
-        "msg": BuildStatus.illegal.msg
+        'status': BuildStatus.illegal.code,
+        'msg': BuildStatus.illegal.msg
       };
     }
   }
 
   static Future<List<Map>> getBuilds(
       {int status, int page = 0, int pageSize = 20}) async {
-    if (page == null) page = 0;
-    if (pageSize == null) pageSize = 20;
+    page ??= 0;
+    pageSize ??= 20;
 
     if (pageSize < 1) pageSize = 1;
 
@@ -134,7 +134,7 @@ class Build {
     }
     var data = await DBManager.find(Constant.tableBuild, mm);
 
-    List<Map> list = [];
+    var list = [];
     for (var d in await data.toList()) {
       list.add(BuildModel.fromJson(d).toJson());
     }
@@ -152,7 +152,7 @@ class Build {
 
   static void init() async {
     if (_frameworks.isEmpty) {
-      List<BaseFramework> lists = List();
+      var lists = [];
       lists.add(MDM4Framework());
       lists.add(MDM41Framework());
       lists.add(MDM42Framework());
@@ -209,7 +209,7 @@ class Build {
     var data =
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
-      BuildModel model = BuildModel.fromJson(data);
+      var model = BuildModel.fromJson(data);
       _build(model);
       return true;
     } else {
@@ -218,14 +218,14 @@ class Build {
   }
 
   static Future<String> start(BuildParams params) async {
-    String key = Utils.newKey();
+    var key = Utils.newKey();
 
     var model = BuildModel(build_id: key, params: params);
 
     await DBManager.save(Constant.tableBuild,
         id: propBuildId, data: model.toJson());
 
-    int now_builds = await DBManager.count(
+    var now_builds = await DBManager.count(
         Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
 
     if (now_builds < envConfig.max_build) {
@@ -241,7 +241,7 @@ class Build {
   static void _build(BuildModel model) async {
     Utils.log('${model.build_id} .... 进入打包状态');
     _lastBuildTime = DateTime.now();
-    BaseFramework framework = _frameworks[model.params.configs.framework];
+    var framework = _frameworks[model.params.configs.framework];
     if (framework == null) {
       model.status = BuildStatus.newFailed(
           '不支持的 framework: ${model.params.configs.framework}');

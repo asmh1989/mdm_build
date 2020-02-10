@@ -17,7 +17,7 @@ class UpdateAndroidManifest extends XmlTransformer {
       if (meta.isNotEmpty) {
         node.children.removeWhere((XmlNode e) {
           if (e is XmlElement) {
-            XmlElement e2 = e;
+            var e2 = e;
             if (e2.name.qualified == 'meta-data') {
               for (var attr in e.attributes) {
                 if (attr.name.qualified == 'android:name' &&

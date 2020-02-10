@@ -7,7 +7,6 @@ import 'package:xml/xml.dart';
 import '../constant.dart';
 import '../db.dart';
 import '../model/build_model.dart';
-import '../params/build_params.dart';
 import '../shell.dart';
 import '../utils.dart';
 import 'base.dart';
@@ -27,7 +26,7 @@ class MDM4Framework implements BaseFramework {
       }
     }
 
-    Shell2 shell = Shell2(workDir: source);
+    var shell = Shell2(workDir: source);
 
     if (File('$source/resign.sh').existsSync()) {
       Utils.log('发现重新签名脚步...');
@@ -42,10 +41,10 @@ class MDM4Framework implements BaseFramework {
 
   @override
   FutureOr<void> build(BuildModel model) async {
-    String appPath = Utils.appPath(model.build_id);
-    String source = '$appPath/$sourceName';
+    var appPath = Utils.appPath(model.build_id);
+    var source = '$appPath/$sourceName';
 
-    b() async {
+    void b() async {
       var build_time = DateTime.now();
 
       /// mdm_4 需要在as工程下进行编译, 所以需要先下载模板
@@ -89,13 +88,13 @@ class MDM4Framework implements BaseFramework {
 
   void changeConfig(BuildModel model, String source) async {
     var tmpSrc = getTmpSrc(source);
-    Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
+    var shell = Shell2(env: {'LANGUAGE': 'en_us'});
 
     var app = model.params;
-    String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
+    var manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = File(manifestFilePath);
     if (file.existsSync()) {
-      var meta = Map<String, String>();
+      var meta = <String, String>{};
 
       meta.addAll(app.configs.baseConfig.meta);
 
@@ -110,7 +109,7 @@ class MDM4Framework implements BaseFramework {
         meta['svn-version'] = '$svn_version';
       } else {
         if (Directory(source + '/.git').existsSync()) {
-          var result = await shell.run("git rev-parse HEAD", source);
+          var result = await shell.run('git rev-parse HEAD', source);
 
           var git_version = result.stdout.toString().trim();
 
@@ -119,8 +118,8 @@ class MDM4Framework implements BaseFramework {
         }
       }
 
-      Map<String, String> attrs = Map();
-      BaseConfig baseConfig = app.configs.baseConfig;
+      var attrs = {};
+      var baseConfig = app.configs.baseConfig;
 
       if (baseConfig.appName.isNotEmpty) {
         attrs['android:label'] = baseConfig.appName;
@@ -165,7 +164,7 @@ class MDM4Framework implements BaseFramework {
   }
 
   void changeRes(BuildModel model, String path, String source) async {
-    String appIcon = '$path/appicon.png';
+    var appIcon = '$path/appicon.png';
 
     if (model.params.configs.baseConfig.appIcon.isNotEmpty) {
       await Utils.download(model.params.configs.baseConfig.appIcon, appIcon);
@@ -186,7 +185,7 @@ class MDM4Framework implements BaseFramework {
     /// 下载svn代码
     var tmpSrc = getTmpSrc(source);
 
-    Directory dir = Directory(tmpSrc);
+    var dir = Directory(tmpSrc);
     if (dir.existsSync()) {
       dir.deleteSync();
     }
@@ -197,9 +196,9 @@ class MDM4Framework implements BaseFramework {
         path: tmpSrc,
         version: model.params.version.revision);
 
-    Shell shell = Shell(workingDirectory: source);
+    var shell = Shell(workingDirectory: source);
 
-    String command = 'copySrc.sh $tmpSrc $source';
+    var command = 'copySrc.sh $tmpSrc $source';
     Utils.log('start run copySrc.sh in $source');
     var result = await shell.run('sh', command.split(' '));
 
@@ -221,7 +220,7 @@ class MDM4Framework implements BaseFramework {
   Future<void> realBuild(BuildModel model, String source) async {
     var logPath = Utils.logPath(model.build_id);
 
-    Shell2 shell = Shell2(workDir: source);
+    var shell = Shell2(workDir: source);
     Utils.log('-----------------${model.build_id} 开始打包---------------------');
     ProcessResult result =
         await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
@@ -236,9 +235,9 @@ class MDM4Framework implements BaseFramework {
   }
 
   void changeBuildGradle(BuildModel model, String source) async {
-    Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
+    var shell = Shell2(env: {'LANGUAGE': 'en_us'});
 
-    String buildGradlePath = source + '/app/build.gradle';
+    var buildGradlePath = source + '/app/build.gradle';
     final file = File(buildGradlePath);
     if (file.existsSync()) {
       /// 删除versionCode

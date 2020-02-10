@@ -11,7 +11,7 @@ import 'utils.dart';
 final _defaultMimeTypeResolver = MimeTypeResolver();
 
 FutureOr<Response> downloadStaticFile(Request request) async {
-  MimeTypeResolver contentTypeResolver = _defaultMimeTypeResolver;
+  var contentTypeResolver = _defaultMimeTypeResolver;
 
   var build_id = request.url.pathSegments.last;
 
@@ -40,7 +40,7 @@ DateTime toSecondResolution(DateTime dt) {
 }
 
 Future<Response> _handleFile(
-    Request request, File file, FutureOr<String> getContentType(),
+    Request request, File file, FutureOr<String> Function() getContentType,
     [String fileName]) async {
   var stat = file.statSync();
   var ifModifiedSince = request.ifModifiedSince;

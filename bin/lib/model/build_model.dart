@@ -25,9 +25,7 @@ class BuildModel {
       : build_id = json[propBuildId] {
     date = json['date'];
     build_time = json[build_time] ?? 0;
-    if (date == null) {
-      date = DateTime.now();
-    }
+    date ??= DateTime.now();
     var info = json[propCode];
     if (info != null) {
       status = BuildStatus(info, json[propMsg]);
@@ -39,13 +37,13 @@ class BuildModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['date'] = this.date;
-    data[propBuildId] = this.build_id;
-    data[propCode] = this.status?.code;
-    data[propMsg] = this.status?.msg;
-    data[propBuildTime] = this.build_time ?? 0;
-    data[propParams] = this.params?.toJson();
+    var data = <String, dynamic>{};
+    data['date'] = date;
+    data[propBuildId] = build_id;
+    data[propCode] = status?.code;
+    data[propMsg] = status?.msg;
+    data[propBuildTime] = build_time ?? 0;
+    data[propParams] = params?.toJson();
     return data;
   }
 }
@@ -55,7 +53,7 @@ class BuildStatus {
   static final failed = const BuildStatus(1, '打包失败');
   static final waiting = const BuildStatus(2, '等待中');
   static final building = const BuildStatus(3, '编译中');
-  static final illegal = const BuildStatus(-1, "非法id");
+  static final illegal = const BuildStatus(-1, '非法id');
 
   final int code;
 

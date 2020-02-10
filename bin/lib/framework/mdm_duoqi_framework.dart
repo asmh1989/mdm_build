@@ -17,13 +17,13 @@ class MDMDuoQiFramework extends MDM4Framework {
   @override
   void changeConfig(BuildModel model, String source) async {
     var tmpSrc = getTmpSrc(source);
-    Shell2 shell = Shell2(env: {'LANGUAGE': 'en_us'});
+    var shell = Shell2(env: {'LANGUAGE': 'en_us'});
 
     var app = model.params;
-    String manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
+    var manifestFilePath = source + '/app/src/main/AndroidManifest.xml';
     final file = File(manifestFilePath);
     if (file.existsSync()) {
-      var meta = Map<String, String>();
+      var meta = <String, String>{};
 
       meta.addAll(app.configs.baseConfig.meta);
 
@@ -38,7 +38,7 @@ class MDMDuoQiFramework extends MDM4Framework {
         meta['svn-version'] = '$svn_version';
       }
 
-      Map<String, String> attrs = Map();
+      var attrs = {};
 
       if (app.configs.baseConfig.appName != null && app.configs.baseConfig.appName .isNotEmpty) {
         attrs['android:label'] = app.configs.baseConfig.appName ;

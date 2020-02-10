@@ -13,17 +13,17 @@ class CreateIcon {
 
   static void create(String file, String path) async {
 //    Utils.log('start decode $file');
-    Image image = decodeImage(await File(file).readAsBytes());
+    var image = decodeImage(await File(file).readAsBytes());
 //    Utils.log('decode $file done');
 
-    for (String key in icons.keys) {
-      String dir = '$path/$key';
+    for (var key in icons.keys) {
+      var dir = '$path/$key';
       Directory(dir).createSync(recursive: true);
-      File file = File('$dir/auto_build_icon.png');
+      var file = File('$dir/auto_build_icon.png');
 
 //      Utils.log('start new ${file.path}');
 
-      Image thumbnail =
+      var thumbnail =
           copyResize(image, height: icons[key], width: icons[key]);
 
       await file.writeAsBytes(encodePng(thumbnail));

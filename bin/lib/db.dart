@@ -66,7 +66,7 @@ class DBManager {
       }
 
       if (val != null && val.isNotEmpty) {
-        for (String key in data.keys) {
+        for (var key in data.keys) {
           val[key] = data[key];
         }
         await coll.save(_updateDate(val));
