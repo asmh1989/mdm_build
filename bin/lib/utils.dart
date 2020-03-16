@@ -44,6 +44,7 @@ class Utils {
 
       if (name != null) {
         list.add(name);
+        await shell.run('rm', ['-rf', name]);
       }
 
       log('shell : git ${list.toString()}');
