@@ -32,6 +32,7 @@ class Version {
   String moduleName;
   String scm;
   String sourceUrl;
+  String channel;
   String branch;
   String revision;
   int versionCode;
@@ -43,6 +44,7 @@ class Version {
       this.scm,
       this.sourceUrl,
       this.branch,
+      this.channel,
       this.revision,
       this.versionCode,
       this.versionName});
@@ -63,6 +65,7 @@ class Version {
     revision = json['revision'];
     versionCode = json['version_code'];
     versionName = json['version_name'];
+    channel = json['channel'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -75,6 +78,7 @@ class Version {
     data['revision'] = revision;
     data['version_code'] = versionCode;
     data['version_name'] = versionName;
+    data['channel'] = channel;
     return data;
   }
 }

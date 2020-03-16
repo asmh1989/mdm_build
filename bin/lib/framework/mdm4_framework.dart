@@ -20,7 +20,14 @@ class MDM4Framework implements BaseFramework {
     var savePath = Utils.packagePath(model.build_id) + '.apk';
     var releasePackage = '$source/app/build/outputs/apk/app-release.apk';
     if (!File(releasePackage).existsSync()) {
-      releasePackage = '$source/app/build/outputs/apk/release/app-release.apk';
+      var channel = model.params.version.channel;
+      if (channel.isNotEmpty) {
+        releasePackage =
+            '$source/app/build/outputs/apk/${channel}/release/app-${channel}-release.apk';
+      } else {
+        releasePackage =
+            '$source/app/build/outputs/apk/release/app-release.apk';
+      }
       if (!File(releasePackage).existsSync()) {
         throw 'apk 包不见了';
       }
@@ -143,11 +150,11 @@ class MDM4Framework implements BaseFramework {
       final propertiesFile = source + '/app/src/main/assets/config.properties';
 
       /// 修改properties配置
-      if (!File(propertiesFile).existsSync()) {
-        File(propertiesFile).createSync(recursive: true);
-      }
 
       for (var key in (app.configs.appConfig ?? {}).keys) {
+        if (!File(propertiesFile).existsSync()) {
+          File(propertiesFile).createSync(recursive: true);
+        }
         ProcessResult find =
             await shell.run('cat $propertiesFile | grep ^$key=');
         if (find.exitCode == 0) {
@@ -224,8 +231,17 @@ class MDM4Framework implements BaseFramework {
     Utils.log('-----------------${model.build_id} 开始打包---------------------');
     ProcessResult result =
         await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
-    result =
-        await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
+
+    var channel = model.params.version.channel;
+    if (channel.length > 1) {
+      var command =
+          './gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release --no-daemon >> $logPath';
+      result = await shell.run(command);
+    } else {
+      result =
+          await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
+    }
+
     Utils.log('-----------------${model.build_id} 打包结束---------------------');
 
     if (result.exitCode != 0) {
@@ -241,10 +257,10 @@ class MDM4Framework implements BaseFramework {
     final file = File(buildGradlePath);
     if (file.existsSync()) {
       /// 删除versionCode
-      await shell.run("sed -i -e '/versionCode */d' $buildGradlePath");
+      await shell.run("sed -i -e '/versionCode .*/d' $buildGradlePath");
 
       /// 删除versionName
-      await shell.run("sed -i -e '/versionName */d' $buildGradlePath");
+      await shell.run("sed -i -e '/versionName .*/d' $buildGradlePath");
     }
   }
 }
