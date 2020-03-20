@@ -4,8 +4,11 @@ import 'dart:io' show Platform, Directory;
 import 'package:dio/dio.dart';
 import 'package:shell/shell.dart';
 import 'package:uuid/uuid.dart';
+import 'package:common_utils/common_utils.dart';
 
+import 'model/build_model.dart';
 import 'model/config_model.dart';
+import 'shell.dart';
 
 class Utils {
   static final Uuid _uuid = Uuid();
@@ -113,6 +116,64 @@ class Utils {
 
   static String ok(Map res) {
     return json.encode({'ok': res}, toEncodable: myEncode);
+  }
+
+  static void mail({BuildModel model, String mail}) async {
+    if (mail.isEmpty || !RegexUtil.isEmail(mail)) {
+      log('$mail 邮箱不正确');
+      return;
+    }
+    var id = model.build_id;
+    var shell = Shell2();
+    var content = '';
+    var title = '打包通知: 恭喜 ${id} 打包成功了!!';
+    if (model.status.code == BuildStatus.failed.code) {
+      title = '打包通知: 抱歉 ${id} 打包失败了..';
+
+      content = '''
+<p> 打包结果如下:  </p>
+<ul>
+<li>打包任务: <code>${id}</code></li>
+<li>打包时间: <code>${model.date}</code></li>
+<li>打包结果: <code>失败</code></li>
+<li>失败原因: </li>
+</ul>
+<pre><code>${model.status.msg}</code></pre>
+<ul>
+</ul>
+
+<p>-----------------------------------------</p>
+<p>PowerBy <code>192.168.2.34</code></p>
+    ''';
+    } else if (model.status.code == BuildStatus.success.code) {
+      content = '''
+<p> 打包结果如下:  </p>
+<ul>
+<li>打包任务: <code>${id}</code></li>
+<li>打包时间: <code>${model.date}</code></li>
+<li>打包结果: <code>成功</code></li>
+<li>打包耗时: <code>${model.build_time} 秒</code></li>
+<li>下载链接: <a href="http://192.168.2.34:7002/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
+</ul>
+
+<p>-----------------------------------------</p>
+<p>PowerBy <code>192.168.2.34</code></p>
+    ''';
+    } else {
+      log('${model.status} 非法状态');
+      return;
+    }
+
+    var command =
+        'echo  "${content}" | mail -r "androidBuild<build@justsafe.com>" -a "Content-type: text/html;" -s "${title}" ${mail}';
+
+    var result = await shell.run(command);
+
+    if (result.exitCode != 0) {
+      Utils.log(result.stderr);
+    } else {
+      Utils.log('邮件已通知到${mail}');
+    }
   }
 
   static String packagePath(String build_id) {

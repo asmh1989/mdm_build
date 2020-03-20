@@ -4,8 +4,9 @@ import 'package:common_utils/common_utils.dart';
 class BuildParams {
   Version version;
   Configs configs;
+  String email;
 
-  BuildParams({this.version, this.configs});
+  BuildParams({this.version, this.configs, this.email});
 
   BuildParams.fromJson(Map<String, dynamic> json) {
     version =
@@ -13,6 +14,8 @@ class BuildParams {
     configs = json['configs'] != null
         ? Configs.fromJson(json['configs'])
         : Configs.fromJson({});
+
+    email = json['email'] ?? '';
   }
 
   Map<String, dynamic> toJson() {

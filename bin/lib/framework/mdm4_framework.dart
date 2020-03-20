@@ -80,6 +80,8 @@ class MDM4Framework implements BaseFramework {
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
       Utils.log('${model.build_id}, 打包结束.....');
+
+      Utils.mail(model: model, mail: model.params.email);
     }
 
     runZoned(() {
@@ -90,6 +92,7 @@ class MDM4Framework implements BaseFramework {
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
+      Utils.mail(model: model, mail: model.params.email);
     });
   }
 
@@ -257,10 +260,14 @@ class MDM4Framework implements BaseFramework {
     final file = File(buildGradlePath);
     if (file.existsSync()) {
       /// 删除versionCode
-      await shell.run("sed -i -e '/versionCode .*/d' $buildGradlePath");
+      if (model.params.version.versionCode != null) {
+        await shell.run("sed -i -e '/versionCode .*/d' $buildGradlePath");
+      }
 
       /// 删除versionName
-      await shell.run("sed -i -e '/versionName .*/d' $buildGradlePath");
+      if (model.params.version.versionName != null) {
+        await shell.run("sed -i -e '/versionName .*/d' $buildGradlePath");
+      }
     }
   }
 }
