@@ -26,6 +26,10 @@ class BuildParams {
     if (configs != null) {
       data['configs'] = configs.toJson();
     }
+
+    if (email.isNotEmpty) {
+      data['email'] = email;
+    }
     return data;
   }
 }

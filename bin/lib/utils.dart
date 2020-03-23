@@ -120,7 +120,9 @@ class Utils {
 
   static void mail({BuildModel model, String mail}) async {
     if (mail.isEmpty || !RegexUtil.isEmail(mail)) {
-      log('$mail 邮箱不正确');
+      if (mail.isNotEmpty) {
+        log('$mail 邮箱不正确');
+      }
       return;
     }
     var id = model.build_id;
