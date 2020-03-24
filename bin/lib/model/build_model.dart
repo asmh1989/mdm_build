@@ -38,7 +38,7 @@ class BuildModel {
 
   Map<String, dynamic> toJson() {
     var data = <String, dynamic>{};
-    data['date'] = date.toIso8601String();
+    data['date'] = date;
     data[propBuildId] = build_id;
     data[propCode] = status?.code;
     data[propMsg] = status?.msg;
