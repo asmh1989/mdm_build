@@ -149,16 +149,20 @@ class Utils {
     ''';
     } else if (model.status.code == BuildStatus.success.code) {
       content = '''
-<p> 打包结果如下:  </p>
+<h3> 打包结果如下:  </h3>
 <ul>
 <li>打包任务: <code>${id}</code></li>
 <li>打包时间: <code>${model.date}</code></li>
 <li>打包结果: <code>成功</code></li>
 <li>打包耗时: <code>${model.build_time} 秒</code></li>
 <li>下载链接: <a href="http://192.168.2.34:7002/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
+<li>版本信息: </li>
+</ul>
+<pre><code>${model.params.version.toPrint()}</code></pre>
+<ul>
 </ul>
 
-<p>-----------------------------------------</p>
+--------------------------------------------
 <p>PowerBy <code>192.168.2.34</code></p>
     ''';
     } else {
