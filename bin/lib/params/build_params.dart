@@ -1,5 +1,4 @@
 import 'package:common_utils/common_utils.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 
 /// 打包请求参数解析
 class BuildParams {
@@ -88,18 +87,6 @@ class Version {
     data['version_name'] = versionName;
     data['channel'] = channel;
     return data;
-  }
-
-  String toPrint() {
-    return '''
-      {
-        sourceUrl: $sourceUrl
-        branch: $branch
-        revision: $revision
-        versionCode: $versionCode
-        versionName: $versionName
-      }
-    ''';
   }
 }
 

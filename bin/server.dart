@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:common_utils/common_utils.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 
@@ -116,6 +117,13 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         return ok(Utils.ok({'id': key}));
       } else if (request.url.path == 'config/sun') {
         return ok(Utils.ok({'env': await Build.initConfig(body)}));
+      } else if(request.url.path == 'test/email'){
+        var id = body['id'];
+        var email = body['email'];
+        if(id == null || !RegexUtil.isEmail(email)){
+          return ok(Utils.error({'msg': '参数错误'}));
+        }
+        return ok(Utils.ok({'msg': await Build.testEmail(id, email)}));
       }
     } catch (e) {
       Utils.log(e.toString());

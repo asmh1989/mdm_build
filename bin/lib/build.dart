@@ -257,4 +257,16 @@ class Build {
       framework.build(model);
     }
   }
+
+  static Future<String> testEmail(String  id, String email) async {
+    var data =
+        await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
+    if (data != null) {
+      var model = BuildModel.fromJson(data);
+      await Utils.mail(model: model, mail: email);
+      return '已发送';
+    } else {
+      return '$id 有误';  
+    }
+  }
 }

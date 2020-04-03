@@ -148,6 +148,11 @@ class Utils {
 <p>PowerBy <code>192.168.2.34</code></p>
     ''';
     } else if (model.status.code == BuildStatus.success.code) {
+      var map = model.params.version.toJson();
+      map.removeWhere((key, value) {
+        return value == null;
+      });
+
       content = '''
 <h3> 打包结果如下:  </h3>
 <ul>
@@ -158,8 +163,8 @@ class Utils {
 <li>下载链接: <a href="http://192.168.2.34:7002/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
 <li>版本信息: </li>
 </ul>
-<pre><code>${model.params.version.toPrint()}</code></pre>
 <ul>
+<pre><code>${JsonEncoder.withIndent('    ').convert(map)}</code></pre>
 </ul>
 
 --------------------------------------------
