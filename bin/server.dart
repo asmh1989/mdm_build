@@ -117,10 +117,10 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         return ok(Utils.ok({'id': key}));
       } else if (request.url.path == 'config/sun') {
         return ok(Utils.ok({'env': await Build.initConfig(body)}));
-      } else if(request.url.path == 'test/email'){
+      } else if (request.url.path == 'test/email') {
         var id = body['id'];
         var email = body['email'];
-        if(id == null || !RegexUtil.isEmail(email)){
+        if (id == null || !RegexUtil.isEmail(email)) {
           return ok(Utils.error({'msg': '参数错误'}));
         }
         return ok(Utils.ok({'msg': await Build.testEmail(id, email)}));

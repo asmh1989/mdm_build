@@ -258,7 +258,7 @@ class Build {
     }
   }
 
-  static Future<String> testEmail(String  id, String email) async {
+  static Future<String> testEmail(String id, String email) async {
     var data =
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
@@ -266,7 +266,7 @@ class Build {
       await Utils.mail(model: model, mail: email);
       return '已发送';
     } else {
-      return '$id 有误';  
+      return '$id 有误';
     }
   }
 }
