@@ -236,7 +236,7 @@ class MDM4Framework implements BaseFramework {
         await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
 
     var channel = model.params.version.channel;
-    if (channel.length > 1) {
+    if (channel.isNotEmpty) {
       var command =
           './gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release --no-daemon >> $logPath';
       result = await shell.run(command);

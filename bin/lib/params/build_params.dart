@@ -85,7 +85,9 @@ class Version {
     data['revision'] = revision;
     data['version_code'] = versionCode;
     data['version_name'] = versionName;
-    data['channel'] = channel;
+    if (channel.isNotEmpty) {
+      data['channel'] = channel;
+    }
     return data;
   }
 }
