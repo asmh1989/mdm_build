@@ -96,6 +96,9 @@ class BaseConfig {
   String appName;
   String appIcon;
 
+  // assetes/config
+  String assets_config;
+
   /// meta-data参数配置
   Map<String, String> meta;
 
@@ -110,6 +113,12 @@ class BaseConfig {
     }
 
     meta = (json['meta'] ?? {})?.cast<String, String>();
+
+    assets_config = json['assets_config'] ?? '';
+
+    if (assets_config.isNotEmpty && !RegexUtil.isURL(assets_config)) {
+      throw 'assets_config 类型错误';
+    }
   }
 
   Map<String, dynamic> toJson() {

@@ -12,6 +12,7 @@ import 'framework/mdm41_framework.dart';
 import 'framework/mdm42_framework.dart';
 import 'framework/mdm4_framework.dart';
 import 'framework/mdm_duoqi_framework.dart';
+import 'framework/normal45_framework.dart';
 import 'framework/normal_framework.dart';
 import 'model/build_model.dart';
 import 'model/config_model.dart';
@@ -161,6 +162,7 @@ class Build {
       lists.add(MDM42Framework());
       lists.add(NormalFramework());
       lists.add(MDMDuoQiFramework());
+      lists.add(Normal45Framework());
 
       for (BaseFramework framework in lists) {
         _frameworks[framework.getName()] = framework;
@@ -241,6 +243,18 @@ class Build {
     return key;
   }
 
+  static Future<String> testEmail(String id, String email) async {
+    var data =
+        await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
+    if (data != null) {
+      var model = BuildModel.fromJson(data);
+      await Utils.mail(model: model, mail: email);
+      return '已发送';
+    } else {
+      return '$id 有误';
+    }
+  }
+
   static void _build(BuildModel model) async {
     Utils.log('${model.build_id} .... 进入打包状态');
     _lastBuildTime = DateTime.now();
@@ -255,18 +269,6 @@ class Build {
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
       framework.build(model);
-    }
-  }
-
-  static Future<String> testEmail(String id, String email) async {
-    var data =
-        await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
-    if (data != null) {
-      var model = BuildModel.fromJson(data);
-      await Utils.mail(model: model, mail: email);
-      return '已发送';
-    } else {
-      return '$id 有误';
     }
   }
 }
