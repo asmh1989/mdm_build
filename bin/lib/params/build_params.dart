@@ -102,7 +102,11 @@ class BaseConfig {
   /// meta-data参数配置
   Map<String, String> meta;
 
-  BaseConfig({this.appName, this.appIcon, this.meta});
+  BaseConfig(
+      {this.appName = '',
+      this.appIcon = '',
+      this.meta,
+      this.assets_config = ''});
 
   BaseConfig.fromJson(Map<String, dynamic> json) {
     appName = json['app_name'] ?? '';
@@ -123,13 +127,19 @@ class BaseConfig {
 
   Map<String, dynamic> toJson() {
     var data = <String, dynamic>{};
-    data['app_name'] = appName;
-    data['app_icon'] = appIcon;
-    if (meta != null) {
+    if (appName.isNotEmpty) {
+      data['app_name'] = appName;
+    }
+    if (appIcon.isNotEmpty) {
+      data['app_icon'] = appIcon;
+    }
+    if (meta != null && meta.isNotEmpty) {
       data['meta'] = meta;
     }
 
-    data['assets_config'] = assets_config;
+    if (assets_config.isNotEmpty) {
+      data['assets_config'] = assets_config;
+    }
 
     return data;
   }
