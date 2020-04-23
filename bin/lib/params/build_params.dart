@@ -128,6 +128,9 @@ class BaseConfig {
     if (meta != null) {
       data['meta'] = meta;
     }
+
+    data['assets_config'] = assets_config;
+
     return data;
   }
 }
