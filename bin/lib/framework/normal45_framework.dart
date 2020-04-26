@@ -10,10 +10,9 @@ class Normal45Framework extends NormalFramework {
   void changeConfig(BuildModel model, String source) async {
     super.changeConfig(model, source);
     var url = model.params.configs.baseConfig.assets_config;
+    var shell = Shell2(env: {'LANGUAGE': 'en_us'});
 
     if (url.isNotEmpty) {
-      var shell = Shell2(env: {'LANGUAGE': 'en_us'});
-
       var zip = '$source/.test.zip';
 
       ProcessResult result = await shell.run('wget $url -O $zip');
@@ -30,6 +29,11 @@ class Normal45Framework extends NormalFramework {
         throw 'assets_config zip文件 压缩覆盖出错!!';
       }
     }
+
+    /// 删除不必要的模块
+    await shell
+        .run('sed -i "s/\'\:developer_debug\',//g" $source/settings.gradle');
+    await shell.run('sed -i -e "/:developer_debug/d" $source/app/build.gradle');
   }
 
   @override
