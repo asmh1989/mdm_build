@@ -6,9 +6,15 @@ import 'utils.dart';
 class DBManager {
   static Db _db;
 
-  static void connect() async {
+  static String sql;
+
+  static void connect({String ip}) async {
+    if(ip != null) {
+      sql ??= 'mongodb://$ip/build_data';
+    }
+
     if (_db == null || _db.state != State.OPEN) {
-      _db = Db('mongodb://127.0.0.1:27017/build_data');
+      _db = Db(sql);
       await _db.open();
     }
   }

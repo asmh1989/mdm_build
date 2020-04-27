@@ -14,11 +14,14 @@ import 'lib/params/build_params.dart';
 import 'lib/utils.dart';
 
 void main(List<String> args) async {
-  var parser = ArgParser()..addOption('port', abbr: 'p', defaultsTo: '7001');
+  var parser = ArgParser()
+    ..addOption('port', abbr: 'p', defaultsTo: '7002')
+    ..addOption('sql', abbr: 's', defaultsTo: '127.0.0.1:27017');
 
   var result = parser.parse(args);
 
   var port = int.tryParse(result['port']);
+  var ip = result['sql'];
 
   if (port == null) {
     stdout.writeln(
@@ -29,7 +32,7 @@ void main(List<String> args) async {
   }
 
   /// 数据库连接
-  DBManager.connect();
+  DBManager.connect(ip: ip);
 
   /// 编译框架初始化
   await Build.init();
