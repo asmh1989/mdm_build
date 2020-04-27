@@ -182,7 +182,7 @@ class Utils {
   }
 
   static void _sendMail(String content, String title, String mail) async {
-    var username = 'gitlab@justsafe.com';
+    var username = 'androidbuild@justsafe.com';
     var password = 'Justsy123';
 
     final server = SmtpServer('mail.justsafe.com',
@@ -192,7 +192,7 @@ class Utils {
         ignoreBadCertificate: true);
 
     final message = Message()
-      ..from = Address('gitlab@justsafe.com', 'androidBuild')
+      ..from = Address(username, 'androidBuild')
       ..recipients.add(mail)
       ..subject = title
       ..html = content;
