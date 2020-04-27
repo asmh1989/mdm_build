@@ -8,9 +8,9 @@ class DBManager {
 
   static String sql;
 
-  static void connect({String ip}) async {
-    if(ip != null) {
-      sql ??= 'mongodb://$ip/build_data';
+  static void connect({String address}) async {
+    if(address != null) {
+      sql ??= 'mongodb://$address/build_data';
     }
 
     if (_db == null || _db.state != State.OPEN) {

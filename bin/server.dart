@@ -16,23 +16,17 @@ import 'lib/utils.dart';
 void main(List<String> args) async {
   var parser = ArgParser()
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
+    ..addOption('ip', abbr: 'i', defaultsTo: '127.0.0.1')
     ..addOption('sql', abbr: 's', defaultsTo: '127.0.0.1:27017');
 
   var result = parser.parse(args);
 
-  var port = int.tryParse(result['port']);
-  var ip = result['sql'];
-
-  if (port == null) {
-    stdout.writeln(
-        'Could not parse port value "${result['port']}" into a number.');
-    // 64: command line usage error
-    exitCode = 64;
-    return;
-  }
+  Utils.port = int.tryParse(result['port']);
+  var sql = result['sql'];
+  Utils.ip = result['ip'];
 
   /// 数据库连接
-  DBManager.connect(ip: ip);
+  DBManager.connect(address: sql);
 
   /// 编译框架初始化
   await Build.init();
@@ -41,7 +35,7 @@ void main(List<String> args) async {
       .addMiddleware(shelf.logRequests())
       .addHandler(_echoRequest);
 
-  var server = await io.serve(handler, '0.0.0.0', port);
+  var server = await io.serve(handler, '0.0.0.0', Utils.port);
   Utils.log('Serving at http://${server.address.host}:${server.port}');
 }
 

@@ -19,6 +19,7 @@ dependencies:
   shell: 1.0.1
   xml: ^3.7.0
   mime: ^0.9.6
+  mailer: ^3.0.4
 
 dev_dependencies:
   pedantic: ^1.0.0

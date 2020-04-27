@@ -1,19 +1,23 @@
 import 'dart:convert';
 import 'dart:io' show Platform, Directory;
 
+import 'package:common_utils/common_utils.dart';
 import 'package:dio/dio.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:shell/shell.dart';
 import 'package:uuid/uuid.dart';
-import 'package:common_utils/common_utils.dart';
 
 import 'model/build_model.dart';
 import 'model/config_model.dart';
-import 'shell.dart';
 
 class Utils {
   static final Uuid _uuid = Uuid();
 
   static final Dio _dio = Dio();
+
+  static String ip;
+  static int port;
 
   static String get cachePath => envConfig.cache_home;
 
@@ -126,7 +130,6 @@ class Utils {
       return;
     }
     var id = model.build_id;
-    var shell = Shell2();
     var content = '';
     var title = '打包通知: 恭喜 ${id} 打包成功了!!';
     if (model.status.code == BuildStatus.failed.code) {
@@ -145,7 +148,7 @@ class Utils {
 </ul>
 
 <p>-----------------------------------------</p>
-<p>PowerBy <code>192.168.2.34</code></p>
+<p>PowerBy <code>$ip</code></p>
     ''';
     } else if (model.status.code == BuildStatus.success.code) {
       var map = model.params.version.toJson();
@@ -160,7 +163,7 @@ class Utils {
 <li>打包时间: <code>${model.date}</code></li>
 <li>打包结果: <code>成功</code></li>
 <li>打包耗时: <code>${model.build_time} 秒</code></li>
-<li>下载链接: <a href="http://192.168.2.34:7002/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
+<li>下载链接: <a href="http://$ip:$port/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
 <li>版本信息: </li>
 </ul>
 <ul>
@@ -168,22 +171,40 @@ class Utils {
 </ul>
 
 --------------------------------------------
-<p>PowerBy <code>192.168.2.34</code></p>
+<p>PowerBy <code>$ip</code></p>
     ''';
     } else {
       log('${model.status} 非法状态');
       return;
     }
 
-    var command =
-        'echo  "${content}" | mail -r "androidBuild<build@justsafe.com>" -a "Content-type: text/html;" -s "${title}" ${mail}';
+    _sendMail(content, title, mail);
+  }
 
-    var result = await shell.run(command);
+  static void _sendMail(String content, String title, String mail) async {
+    var username = 'gitlab@justsafe.com';
+    var password = 'Justsy123';
 
-    if (result.exitCode != 0) {
-      Utils.log(result.stderr);
-    } else {
-      Utils.log('邮件已通知到${mail}');
+    final server = SmtpServer('mail.justsafe.com',
+        username: username,
+        password: password,
+        port: 587,
+        ignoreBadCertificate: true);
+
+    final message = Message()
+      ..from = Address('gitlab@justsafe.com', 'androidBuild')
+      ..recipients.add(mail)
+      ..subject = title
+      ..html = content;
+
+    try {
+      await send(message, server);
+      Utils.log('Message sent: $mail');
+    } on MailerException catch (e) {
+      Utils.log('Message not sent. $e');
+      for (var p in e.problems) {
+        Utils.log('Problem: ${p.code}: ${p.msg}');
+      }
     }
   }
 
