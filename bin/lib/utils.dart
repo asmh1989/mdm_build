@@ -153,8 +153,12 @@ class Utils {
     } else if (model.status.code == BuildStatus.success.code) {
       var map = model.params.version.toJson();
       map.removeWhere((key, value) {
-        return value == null;
+        return value == null || value.toString().isEmpty;
       });
+
+      if (model.params.configs.baseConfig.assets_config.isNotEmpty) {
+        map['assets_config'] = model.params.configs.baseConfig.assets_config;
+      }
 
       content = '''
 <h3> 打包结果如下:  </h3>
