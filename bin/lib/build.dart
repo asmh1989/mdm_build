@@ -140,7 +140,8 @@ class Build {
 
     var list = [];
     for (var d in await data.toList()) {
-      list.add(BuildModel.fromJson(d).toJson());
+      var model = BuildModel.fromJson(d);
+      list.add(model.toJson());
     }
 
     return list;

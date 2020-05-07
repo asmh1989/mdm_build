@@ -23,9 +23,8 @@ class BuildModel {
 
   BuildModel.fromJson(Map<String, dynamic> json)
       : build_id = json[propBuildId] {
-    date = json['date'];
-    build_time = json[build_time] ?? 0;
-    date ??= DateTime.now();
+    date = json['date'] ?? DateTime.now();
+    build_time = json[propBuildTime] ?? 0;
     var info = json[propCode];
     if (info != null) {
       status = BuildStatus(info, json[propMsg]);
@@ -44,6 +43,7 @@ class BuildModel {
     data[propMsg] = status?.msg;
     data[propBuildTime] = build_time ?? 0;
     data[propParams] = params?.toJson();
+    data['email'] = params?.email;
     return data;
   }
 }

@@ -9,7 +9,7 @@ class DBManager {
   static String sql;
 
   static void connect({String address}) async {
-    if(address != null) {
+    if (address != null) {
       sql ??= 'mongodb://$address/build_data';
     }
 
@@ -86,7 +86,7 @@ class DBManager {
   }
 
   static Map<String, dynamic> _updateDate(Map<String, dynamic> data) {
-    data['date'] = DateTime.now();
+    data['date'] ??= DateTime.now();
     return data;
   }
 }

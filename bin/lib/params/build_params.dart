@@ -96,7 +96,7 @@ class BaseConfig {
   String appName;
   String appIcon;
 
-  // assetes/config
+  /// assets/config
   String assets_config;
 
   /// meta-data参数配置
