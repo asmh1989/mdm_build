@@ -15,7 +15,7 @@ class Normal45Framework extends NormalFramework {
     if (url.isNotEmpty) {
       var zip = '$source/.test.zip';
 
-      ProcessResult result = await shell.run('wget $url -O $zip');
+      ProcessResult result = await shell.run('wget "$url" -O $zip');
       if (result.exitCode != 0) {
         Utils.log(result.stderr);
         throw '$url 下载出错了!!';
