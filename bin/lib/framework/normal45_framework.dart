@@ -40,4 +40,30 @@ class Normal45Framework extends NormalFramework {
   String getName() {
     return 'normal_4.5';
   }
+
+  @override
+  Future<void> realBuild(BuildModel model, String source) async {
+    var logPath = Utils.logPath(model.build_id);
+
+    var shell = Shell2(workDir: source);
+    Utils.log('-----------------${model.build_id} 开始打包---------------------');
+    ProcessResult result;
+
+    var channel = model.params.version.channel;
+    if (channel.isNotEmpty) {
+      var command =
+          'chmod a+x gradlew && ./gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release >> $logPath';
+      result = await shell.run(command);
+    } else {
+      result = await shell
+          .run('chmod a+x gradlew && ./gradlew assembleRelease >> $logPath');
+    }
+
+    Utils.log('-----------------${model.build_id} 打包结束---------------------');
+
+    if (result.exitCode != 0) {
+      Utils.log(result.stderr);
+      throw '编译失败, ${result.stderr}';
+    }
+  }
 }
