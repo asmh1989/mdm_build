@@ -52,11 +52,11 @@ class Normal45Framework extends NormalFramework {
     var channel = model.params.version.channel;
     if (channel.isNotEmpty) {
       var command =
-          'chmod a+x gradlew && ./gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release >> $logPath';
+          'chmod a+x gradlew && ./gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release --no-daemon >> $logPath';
       result = await shell.run(command);
     } else {
-      result = await shell
-          .run('chmod a+x gradlew && ./gradlew assembleRelease >> $logPath');
+      result = await shell.run(
+          'chmod a+x gradlew && ./gradlew assembleRelease --no-daemon >> $logPath');
     }
 
     Utils.log('-----------------${model.build_id} 打包结束---------------------');

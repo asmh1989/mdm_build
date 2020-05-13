@@ -31,11 +31,13 @@ void _clearCache() async {
       var name = p.basename(file.path);
       var data = await DBManager.findOne(
           Constant.tableBuild, where.eq(propBuildId, name));
-      var willDel = false;
+      var willDel = true;
       if (data != null) {
         var model = BuildModel.fromJson(data);
         if (model.status.code < BuildStatus.waiting.code) {
           willDel = true;
+        } else {
+          willDel = false;
         }
       }
 
