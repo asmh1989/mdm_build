@@ -206,9 +206,6 @@ class Utils {
       Utils.log('Message sent: $mail');
     } on MailerException catch (e) {
       Utils.log('Message not sent. $e');
-      for (var p in e.problems) {
-        Utils.log('Problem: ${p.code}: ${p.msg}');
-      }
     }
   }
 

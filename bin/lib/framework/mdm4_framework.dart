@@ -92,6 +92,11 @@ class MDM4Framework implements BaseFramework {
     }, onError: (e, stacks) async {
       Utils.log(e);
       print(stacks);
+
+      if (model.status.code == BuildStatus.success.code) {
+        return;
+      }
+
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
