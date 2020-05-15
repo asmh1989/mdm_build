@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'lib/utils.dart';
+
+import 'utils.dart';
 
 class Weed {
   static const ip = 'android.justsafe.com';

@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:shell/shell.dart';
 import 'package:xml/xml.dart';
 
-import '../../weed.dart';
 import '../constant.dart';
 import '../db.dart';
 import '../model/build_model.dart';
 import '../shell.dart';
 import '../utils.dart';
+import '../weed.dart';
 import 'base.dart';
 import 'create_icon.dart';
 import 'update_androidmanifest.dart';
