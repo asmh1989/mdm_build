@@ -12,7 +12,7 @@ import 'lib/db.dart';
 import 'lib/download.dart';
 import 'lib/params/build_params.dart';
 import 'lib/utils.dart';
-import 'weed.dart';
+import 'lib/weed.dart';
 
 void main(List<String> args) async {
   var parser = ArgParser()
