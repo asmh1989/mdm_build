@@ -12,12 +12,13 @@ import 'lib/db.dart';
 import 'lib/download.dart';
 import 'lib/params/build_params.dart';
 import 'lib/utils.dart';
+import 'weed.dart';
 
 void main(List<String> args) async {
   var parser = ArgParser()
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
     ..addOption('ip', abbr: 'i', defaultsTo: '127.0.0.1')
-    ..addOption('sql', abbr: 's', defaultsTo: '127.0.0.1:27017');
+    ..addOption('sql', abbr: 's', defaultsTo: '192.168.10.64:27017');
 
   var result = parser.parse(args);
 
@@ -121,6 +122,10 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
           return ok(Utils.error({'msg': '参数错误'}));
         }
         return ok(Utils.ok({'msg': await Build.testEmail(id, email)}));
+      } else if (request.url.path == 'test/weed') {
+        var id = body['id'];
+        var apk = Utils.packagePath(id) + '.apk';
+        return ok(Utils.ok({'fid': await Weed.upload(apk)}));
       }
     } catch (e) {
       Utils.log(e.toString());

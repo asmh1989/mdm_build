@@ -57,8 +57,8 @@ class Version {
       this.versionName});
 
   Version.fromJson(Map<String, dynamic> json) {
-    projectName = json['project_name'];
-    moduleName = json['module_name'];
+    projectName = json['project_name'] ?? '';
+    moduleName = json['module_name'] ?? '';
     scm = json['scm'] ?? '';
     scm = scm.toLowerCase();
 
@@ -68,8 +68,8 @@ class Version {
       throw 'source_url 类型错误';
     }
 
-    branch = json['branch'];
-    revision = json['revision'];
+    branch = json['branch'] ?? '';
+    revision = json['revision'] ?? '';
     versionCode = json['version_code'];
     versionName = json['version_name'];
     channel = json['channel'] ?? '';
@@ -77,14 +77,26 @@ class Version {
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
-    data['project_name'] = projectName;
-    data['module_name'] = moduleName;
+    if (projectName.isNotEmpty) {
+      data['project_name'] = projectName;
+    }
+    if (moduleName.isNotEmpty) {
+      data['module_name'] = moduleName;
+    }
     data['scm'] = scm;
     data['source_url'] = sourceUrl;
-    data['branch'] = branch;
-    data['revision'] = revision;
-    data['version_code'] = versionCode;
-    data['version_name'] = versionName;
+    if (branch.isNotEmpty) {
+      data['branch'] = branch;
+    }
+    if (revision.isNotEmpty) {
+      data['revision'] = revision;
+    }
+    if (versionCode != null) {
+      data['version_code'] = versionCode;
+    }
+    if (versionName != null) {
+      data['version_name'] = versionName;
+    }
     if (channel.isNotEmpty) {
       data['channel'] = channel;
     }

@@ -19,7 +19,13 @@ class BuildModel {
 
   int build_time;
 
-  BuildModel({@required this.build_id, this.params, this.build_time = 0});
+  String fid;
+
+  BuildModel(
+      {@required this.build_id,
+      this.params,
+      this.build_time = 0,
+      this.fid = ''});
 
   BuildModel.fromJson(Map<String, dynamic> json)
       : build_id = json[propBuildId] {
@@ -33,6 +39,8 @@ class BuildModel {
     }
 
     params = BuildParams.fromJson(json[propParams] ?? {});
+
+    fid = json['fid'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -44,6 +52,9 @@ class BuildModel {
     data[propBuildTime] = build_time ?? 0;
     data[propParams] = params?.toJson();
     data['email'] = params?.email;
+    if (fid.isNotEmpty) {
+      data['fid'] = fid;
+    }
     return data;
   }
 }

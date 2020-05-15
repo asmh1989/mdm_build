@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:shell/shell.dart';
 import 'package:xml/xml.dart';
 
+import '../../weed.dart';
 import '../constant.dart';
 import '../db.dart';
 import '../model/build_model.dart';
@@ -44,6 +45,8 @@ class MDM4Framework implements BaseFramework {
     }
 
     await shell.run('cp  $releasePackage $savePath');
+
+    model.fid = await Weed.upload(savePath);
   }
 
   @override
@@ -110,7 +113,7 @@ class MDM4Framework implements BaseFramework {
 
       if (Directory(tmpSrc).existsSync()) {
         var svn_version = model.params.version.revision;
-        if (svn_version == null) {
+        if (svn_version == null && svn_version.isNotEmpty) {
           var result = await shell.run(
               "svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
           svn_version = result.stdout.toString().trim();

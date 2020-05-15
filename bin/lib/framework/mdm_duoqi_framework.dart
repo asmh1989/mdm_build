@@ -29,7 +29,7 @@ class MDMDuoQiFramework extends MDM4Framework {
 
       if (Directory(tmpSrc).existsSync()) {
         var svn_version = app.version.revision;
-        if (svn_version == null) {
+        if (svn_version == null && svn_version.isNotEmpty) {
           var result = await shell.run(
               "svn info | awk '\$3==\"Rev:\" {print \$4}'", tmpSrc);
           svn_version = result.stdout.toString().trim();

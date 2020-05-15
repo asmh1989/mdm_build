@@ -4,8 +4,13 @@ import 'dart:io';
 
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shelf/shelf.dart' show Response, Request;
 
+import '../weed.dart';
+import 'constant.dart';
+import 'db.dart';
+import 'model/build_model.dart';
 import 'utils.dart';
 
 final _defaultMimeTypeResolver = MimeTypeResolver();
@@ -14,6 +19,21 @@ FutureOr<Response> downloadStaticFile(Request request) async {
   var contentTypeResolver = _defaultMimeTypeResolver;
 
   var build_id = request.url.pathSegments.last;
+
+  if (build_id.isNotEmpty && build_id.contains('.')) {}
+
+  var data = await DBManager.findOne(
+      Constant.tableBuild,
+      where.eq(propBuildId,
+          build_id.contains('.') ? build_id.split('.')[0] : build_id));
+  if (data != null) {
+    var model = BuildModel.fromJson(data);
+    if (model.fid.isNotEmpty) {
+      var url = 'http://${Weed.ip}:8080/${model.fid}';
+      Utils.log('发现fid, 重定向到 $url');
+      return Response.seeOther(url);
+    }
+  }
 
   var fsPath = Utils.packagePath(build_id);
 
