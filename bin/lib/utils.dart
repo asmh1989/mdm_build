@@ -20,6 +20,9 @@ class Utils {
   static String ip;
   static int port;
 
+  static bool isManager = false;
+  static bool disableWeed = false;
+
   static String get cachePath => envConfig.cache_home;
 
   static String get HOME =>

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:shell/shell.dart';
 import 'package:xml/xml.dart';
 
+import '../build.dart';
 import '../constant.dart';
 import '../db.dart';
 import '../model/build_model.dart';
@@ -45,6 +46,10 @@ class MDM4Framework implements BaseFramework {
     }
 
     await shell.run('cp  $releasePackage $savePath');
+
+    if (Utils.disableWeed) {
+      return;
+    }
 
     if (model.params.version.projectName.isNotEmpty) {
       var fileName =
@@ -88,7 +93,7 @@ class MDM4Framework implements BaseFramework {
       model.build_time = DateTime.now().difference(build_time).inSeconds.abs();
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
-      Utils.log('${model.build_id}, 打包结束.....');
+      Build.finish(model);
 
       Utils.mail(model: model, mail: model.params.email);
     }
@@ -98,7 +103,7 @@ class MDM4Framework implements BaseFramework {
     }, onError: (e, stacks) async {
       Utils.log(e);
       print(stacks);
-
+      Build.finish(model);
       if (model.status.code == BuildStatus.success.code) {
         return;
       }
@@ -106,6 +111,7 @@ class MDM4Framework implements BaseFramework {
       model.status = BuildStatus.newFailed(e.toString());
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
+
       Utils.mail(model: model, mail: model.params.email);
     });
   }

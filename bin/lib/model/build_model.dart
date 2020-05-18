@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../params/build_params.dart';
+import '../utils.dart';
 
 const propBuildId = 'build_id';
 const propBuildTime = 'build_time';
@@ -21,10 +22,13 @@ class BuildModel {
 
   String fid;
 
+  String operate;
+
   BuildModel(
       {@required this.build_id,
       this.params,
       this.build_time = 0,
+      this.operate,
       this.fid = ''});
 
   BuildModel.fromJson(Map<String, dynamic> json)
@@ -41,6 +45,8 @@ class BuildModel {
     params = BuildParams.fromJson(json[propParams] ?? {});
 
     fid = json['fid'] ?? '';
+
+    operate = json['operate'] ?? Utils.ip;
   }
 
   Map<String, dynamic> toJson() {
@@ -55,6 +61,9 @@ class BuildModel {
     if (fid.isNotEmpty) {
       data['fid'] = fid;
     }
+
+    data['operate'] = operate;
+
     return data;
   }
 }

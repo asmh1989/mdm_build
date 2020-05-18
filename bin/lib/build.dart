@@ -17,9 +17,12 @@ import 'framework/normal_framework.dart';
 import 'model/build_model.dart';
 import 'model/config_model.dart';
 import 'params/build_params.dart';
+import 'redis.dart';
 import 'utils.dart';
+import 'weed.dart';
 
 DateTime _lastBuildTime = DateTime.now();
+const String channel = 'build_work';
 
 void _clearCache() async {
   var appPath = p.normalize(Utils.appPath(''));
@@ -61,45 +64,45 @@ void _doTimerWork() async {
   }
   await Build.initConfig();
   await _clearCache();
-  while (true) {
-    var buildings = await DBManager.count(
-        Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
-    if (buildings < envConfig.max_build) {
-      var data = await DBManager.findOne(
+
+  /// 主服务下管理编译异常的服务
+  if (Utils.isManager) {
+    var waitings = await DBManager.count(
+        Constant.tableBuild, where.eq(propCode, BuildStatus.waiting.code));
+    if (waitings > 0) {
+      var data = await DBManager.find(
           Constant.tableBuild, where.eq(propCode, BuildStatus.waiting.code));
 
-      if (data != null && data.isNotEmpty) {
-        var model = BuildModel.fromJson(data);
-        await Build._build(model);
-      } else {
-        break;
+      if (data != null) {
+        await data.forEach((element) async {
+          var model = BuildModel.fromJson(element);
+          await Redis.publish(channel, model.build_id);
+        });
       }
-    } else {
-      break;
     }
-  }
 
-  var builds = await DBManager.find(
-      Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
-  for (var data in await builds.toList()) {
-    var model = BuildModel.fromJson(data);
-    if (model.date.difference(DateTime.now()).inMinutes.abs() > 20) {
-      Utils.log(
-          '发现异常的打包记录, ${model.build_id}, date: ${model.date.toIso8601String()}');
-      var app = Directory(Utils.appPath(model.build_id));
-      if (app.existsSync()) {
-        app.deleteSync(recursive: true);
+    var builds = await DBManager.find(
+        Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
+    for (var data in await builds.toList()) {
+      var model = BuildModel.fromJson(data);
+      if (model.date.difference(DateTime.now()).inMinutes.abs() > 20) {
+        Utils.log(
+            '发现异常的打包记录, ${model.build_id}, date: ${model.date.toIso8601String()}');
+        var app = Directory(Utils.appPath(model.build_id));
+        if (app.existsSync()) {
+          app.deleteSync(recursive: true);
+        }
+
+        await Redis.publish(channel, model.build_id);
       }
-
-      await Build._build(model);
     }
   }
 }
 
 class Build {
-  static int MAX_BUILDS = 3000;
-
   static final Map<String, BaseFramework> _frameworks = {};
+
+  static bool running = false;
 
   static Future getBuild(String id) async {
     var data =
@@ -113,7 +116,7 @@ class Build {
             : model.status.msg,
         'detail': model.status.msg,
         'downloadPath': model.status.code == BuildStatus.success.code
-            ? '/app/package/${model.build_id}.apk'
+            ? 'http://${Weed.ip}:8080/${model.fid}'
             : ''
       };
     } else {
@@ -180,6 +183,32 @@ class Build {
     Timer.periodic(Duration(seconds: 60), (Timer t) => _doTimerWork());
 
     Timer(Duration(seconds: 2), () => _doTimerWork());
+
+    Redis.subscribe(channel);
+
+    Redis.setReceiver((key, value) async {
+      if (running) {
+        Utils.log('有任务正在进行, 忽略任务 $value');
+      }
+
+      if (key == channel && value.isNotEmpty) {
+        var data = await DBManager.findOne(
+            Constant.tableBuild, where.eq(propBuildId, value));
+        if (data != null) {
+          var model = BuildModel.fromJson(data);
+          model.operate = Utils.ip;
+
+          if (model.status.code != BuildStatus.waiting.code) {
+            return;
+          }
+
+          Utils.log('收到redis打包请求 $value');
+          _build(model);
+        } else {
+          Utils.log('收到错误的打包请求 $value');
+        }
+      }
+    });
   }
 
   static Future<Map> initConfig([Map<String, dynamic> config]) async {
@@ -230,18 +259,13 @@ class Build {
 
     var model = BuildModel(build_id: key, params: params);
 
+    model.status = BuildStatus.waiting;
+
     await DBManager.save(Constant.tableBuild,
         id: propBuildId, data: model.toJson());
 
-    var now_builds = await DBManager.count(
-        Constant.tableBuild, where.eq(propCode, BuildStatus.building.code));
-
-    if (now_builds < envConfig.max_build) {
-      await _build(model);
-    } else {
-      Utils.log(
-          '$key need waiting... building: $now_builds, max_build:${envConfig.max_build}');
-    }
+    // 推送消息
+    await Redis.publish(channel, key);
 
     return key;
   }
@@ -259,19 +283,31 @@ class Build {
   }
 
   static void _build(BuildModel model) async {
-    Utils.log('${model.build_id} .... 进入打包状态');
-    _lastBuildTime = DateTime.now();
-    var framework = _frameworks[model.params.configs.framework];
-    if (framework == null) {
-      model.status = BuildStatus.newFailed(
-          '不支持的 framework: ${model.params.configs.framework}');
-      await DBManager.save(Constant.tableBuild,
-          id: propBuildId, data: model.toJson());
+    if (await Redis.lock(model.build_id)) {
+      running = true;
+      Utils.log('${model.build_id} .... 进入打包状态');
+      _lastBuildTime = DateTime.now();
+      var framework = _frameworks[model.params.configs.framework];
+      if (framework == null) {
+        model.status = BuildStatus.newFailed(
+            '不支持的 framework: ${model.params.configs.framework}');
+        await DBManager.save(Constant.tableBuild,
+            id: propBuildId, data: model.toJson());
+
+        finish(model);
+      } else {
+        model.status = BuildStatus.building;
+        await DBManager.save(Constant.tableBuild,
+            id: propBuildId, data: model.toJson());
+        await framework.build(model);
+      }
     } else {
-      model.status = BuildStatus.building;
-      await DBManager.save(Constant.tableBuild,
-          id: propBuildId, data: model.toJson());
-      framework.build(model);
+      Utils.log('${model.build_id} 任务锁定失败');
     }
+  }
+
+  static void finish(BuildModel model) async {
+    await Redis.unlock(model.build_id);
+    running = false;
   }
 }

@@ -2,6 +2,8 @@ import 'package:dartis/dartis.dart';
 
 import './utils.dart';
 
+typedef OnReceiver = void Function(String key, String value);
+
 class Redis {
   static const _url = 'redis://192.168.10.64:6379';
 
@@ -14,13 +16,27 @@ class Redis {
 
   static Commands<String, String> _commands;
 
-  static PubSub<String, String> _pub;
+  static PubSub<String, String> sub;
+
+  static OnReceiver _receiver;
 
   static void connect() async {
     if (_client == null) {
       _client = await Client.connect(_url);
-      _pub = await PubSub.connect<String, String>(_url);
+      sub = await PubSub.connect<String, String>(_url);
       _commands = _client.asCommands<String, String>();
+
+      sub.stream.listen((PubSubEvent e) {
+        if (e is MessageEvent<String, String>) {
+          _receiver(e.channel, e.message);
+        }
+      });
+    }
+  }
+
+  static void setReceiver(OnReceiver receiver) {
+    if (receiver != null) {
+      _receiver = receiver;
     }
   }
 
@@ -95,10 +111,7 @@ class Redis {
   static void subscribe(String channel) async {
     try {
       await connect();
-      _pub.subscribe(channel: channel);
-      _pub.stream.listen((event) {
-        Utils.log(' pubsub listen $event');
-      });
+      sub.subscribe(channel: channel);
     } catch (e) {
       Utils.log(' subscribe $channel  error = $e');
       _disconnect();

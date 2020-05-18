@@ -11,13 +11,16 @@ import 'lib/build.dart';
 import 'lib/db.dart';
 import 'lib/download.dart';
 import 'lib/params/build_params.dart';
+import 'lib/redis.dart';
 import 'lib/utils.dart';
 import 'lib/weed.dart';
 
 void main(List<String> args) async {
   var parser = ArgParser()
+    ..addFlag('disableWeed', defaultsTo: false)
+    ..addFlag('manager', abbr: 'm', defaultsTo: false)
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
-    ..addOption('ip', abbr: 'i', defaultsTo: '127.0.0.1')
+    ..addOption('ip', abbr: 'i', defaultsTo: Platform.localHostname)
     ..addOption('sql', abbr: 's', defaultsTo: '192.168.10.64:27017');
 
   var result = parser.parse(args);
@@ -26,18 +29,27 @@ void main(List<String> args) async {
   var sql = result['sql'];
   Utils.ip = result['ip'];
 
+  Utils.isManager = result['manager'];
+  Utils.disableWeed = result['disableWeed'];
+
   /// 数据库连接
   DBManager.connect(address: sql);
+
+  /// redis初始化
+  await Redis.init();
 
   /// 编译框架初始化
   await Build.init();
 
-  var handler = const shelf.Pipeline()
-      .addMiddleware(shelf.logRequests())
-      .addHandler(_echoRequest);
+  if (Utils.isManager) {
+    var handler = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addHandler(_echoRequest);
 
-  var server = await io.serve(handler, '0.0.0.0', Utils.port);
-  Utils.log('Serving at http://${server.address.host}:${server.port}');
+    var server = await io.serve(handler, '0.0.0.0', Utils.port);
+    Utils.log(
+        'Serving at http://${server.address.host}:${server.port}, isManager=${Utils.isManager} disableWeed=${Utils.disableWeed}');
+  }
 }
 
 FutureOr<shelf.Response> ok(FutureOr<String> content) {
