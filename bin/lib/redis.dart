@@ -27,8 +27,10 @@ class Redis {
       _commands = _client.asCommands<String, String>();
 
       sub.stream.listen((PubSubEvent e) {
-        if (e is MessageEvent<String, String>) {
-          _receiver(e.channel, e.message);
+        if (_receiver != null) {
+          if (e is MessageEvent<String, String>) {
+            _receiver(e.channel, e.message);
+          }
         }
       });
     }

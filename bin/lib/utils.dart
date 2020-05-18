@@ -20,8 +20,14 @@ class Utils {
   static String ip;
   static int port;
 
+  /// true: 表示主服务器, false: 表示服务只会根据redis订阅打包任务
   static bool isManager = false;
+
+  /// true: 表示不会上传到 weed
   static bool disableWeed = false;
+
+  /// 主服务下, 关闭打包能力
+  static bool disableManagerBuild = false;
 
   static String get cachePath => envConfig.cache_home;
 

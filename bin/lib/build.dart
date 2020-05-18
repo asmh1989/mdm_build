@@ -186,6 +186,10 @@ class Build {
 
     Redis.subscribe(channel);
 
+    if (Utils.isManager && Utils.disableManagerBuild) {
+      return;
+    }
+
     Redis.setReceiver((key, value) async {
       if (running) {
         Utils.log('有任务正在进行, 忽略任务 $value');

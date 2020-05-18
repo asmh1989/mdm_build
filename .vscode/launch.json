@@ -14,7 +14,8 @@
                 "-p",
                 "7005",
                 "--manager",
-                "--disableWeed"
+                "--disableWeed",
+                "--disableManagerBuild"
             ],
             "type": "dart"
         }

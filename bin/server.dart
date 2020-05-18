@@ -18,6 +18,7 @@ import 'lib/weed.dart';
 void main(List<String> args) async {
   var parser = ArgParser()
     ..addFlag('help', abbr: 'h', defaultsTo: false)
+    ..addFlag('disableManagerBuild', defaultsTo: false)
     ..addFlag('disableWeed', defaultsTo: false)
     ..addFlag('manager', abbr: 'm', defaultsTo: false)
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
@@ -37,6 +38,7 @@ void main(List<String> args) async {
 
   Utils.isManager = result['manager'];
   Utils.disableWeed = result['disableWeed'];
+  Utils.disableManagerBuild = result['disableManagerBuild'];
 
   /// 数据库连接
   DBManager.connect(address: sql);
@@ -48,10 +50,10 @@ void main(List<String> args) async {
   await Build.init();
 
   Utils.log(''' 这是一台 ${Utils.isManager ? '打包主服务器' : '辅助打包服务器'}: 
-        port = ${Utils.port},
         sql = $sql,
         host = ${Utils.ip},
-        disableWeed = ${Utils.disableWeed}''');
+        disableWeed = ${Utils.disableWeed}
+        disableManagerBuild= ${Utils.disableManagerBuild}''');
 
   if (Utils.isManager) {
     var handler = const shelf.Pipeline()
