@@ -20,8 +20,6 @@ FutureOr<Response> downloadStaticFile(Request request) async {
 
   var build_id = request.url.pathSegments.last;
 
-  if (build_id.isNotEmpty && build_id.contains('.')) {}
-
   var data = await DBManager.findOne(
       Constant.tableBuild,
       where.eq(propBuildId,

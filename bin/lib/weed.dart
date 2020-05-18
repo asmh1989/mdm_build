@@ -8,7 +8,7 @@ class Weed {
   static const lookupurl = 'http://$ip:9333/dir/lookup?fileId=';
   static const authkey = 'Authorization';
 
-  static Future<String> upload(String file) async {
+  static Future<String> upload(String file, {String fileName}) async {
     var dio = Dio();
     var res = await dio.get(assignurl);
 
@@ -21,7 +21,9 @@ class Weed {
 
       res = await dio.post('http://$url/$fid',
           options: Options(headers: {authkey: auth}),
-          data: FormData.fromMap({'file': await MultipartFile.fromFile(file)}));
+          data: FormData.fromMap({
+            'file': await MultipartFile.fromFile(file, filename: fileName)
+          }));
 
       if (res.data != null) {
         Utils.log('上传成功 : ${res.data}');

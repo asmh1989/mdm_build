@@ -46,7 +46,13 @@ class MDM4Framework implements BaseFramework {
 
     await shell.run('cp  $releasePackage $savePath');
 
-    model.fid = await Weed.upload(savePath);
+    if (model.params.version.projectName.isNotEmpty) {
+      var fileName =
+          '${model.params.version.projectName}_${model.params.version.versionName}.apk';
+      model.fid = await Weed.upload(savePath, fileName: fileName);
+    } else {
+      model.fid = await Weed.upload(savePath);
+    }
   }
 
   @override
