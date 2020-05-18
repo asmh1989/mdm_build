@@ -180,7 +180,7 @@ class Build {
 
     Utils.log('env_config: ${json.encode(envConfig.toJson())}');
 
-    Timer.periodic(Duration(seconds: 60), (Timer t) => _doTimerWork());
+    Timer.periodic(Duration(seconds: 30), (Timer t) => _doTimerWork());
 
     Timer(Duration(seconds: 2), () => _doTimerWork());
 
@@ -302,8 +302,6 @@ class Build {
             id: propBuildId, data: model.toJson());
         await framework.build(model);
       }
-    } else {
-      Utils.log('${model.build_id} 任务锁定失败');
     }
   }
 
