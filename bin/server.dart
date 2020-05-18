@@ -41,14 +41,19 @@ void main(List<String> args) async {
   /// 编译框架初始化
   await Build.init();
 
+  Utils.log(''' 这是一台 ${Utils.isManager ? '打包主服务器' : '辅助打包服务器'}: 
+        port = ${Utils.port},
+        sql = $sql,
+        host = ${Utils.ip},
+        disableWeed = ${Utils.disableWeed}''');
+
   if (Utils.isManager) {
     var handler = const shelf.Pipeline()
         .addMiddleware(shelf.logRequests())
         .addHandler(_echoRequest);
 
     var server = await io.serve(handler, '0.0.0.0', Utils.port);
-    Utils.log(
-        'Serving at http://${server.address.host}:${server.port}, isManager=${Utils.isManager} disableWeed=${Utils.disableWeed}');
+    Utils.log('Serving at http://${server.address.host}:${server.port}');
   }
 }
 
