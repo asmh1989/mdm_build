@@ -116,7 +116,7 @@ class Build {
             : model.status.msg,
         'detail': model.status.msg,
         'downloadPath': model.status.code == BuildStatus.success.code
-            ? 'http://${Weed.ip}:8080/${model.fid}'
+            ? '/app/package/${model.build_id}.apk'
             : ''
       };
     } else {
