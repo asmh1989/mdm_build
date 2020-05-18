@@ -17,6 +17,7 @@ import 'lib/weed.dart';
 
 void main(List<String> args) async {
   var parser = ArgParser()
+    ..addFlag('help', abbr: 'h', defaultsTo: false)
     ..addFlag('disableWeed', defaultsTo: false)
     ..addFlag('manager', abbr: 'm', defaultsTo: false)
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
@@ -24,6 +25,11 @@ void main(List<String> args) async {
     ..addOption('sql', abbr: 's', defaultsTo: '192.168.10.64:27017');
 
   var result = parser.parse(args);
+
+  if (result['help']) {
+    print(parser.usage);
+    return;
+  }
 
   Utils.port = int.tryParse(result['port']);
   var sql = result['sql'];
