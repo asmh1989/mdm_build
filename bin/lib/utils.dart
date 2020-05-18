@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import 'model/build_model.dart';
 import 'model/config_model.dart';
+import 'weed.dart';
 
 class Utils {
   static final Uuid _uuid = Uuid();
@@ -167,7 +168,7 @@ class Utils {
 <li>打包时间: <code>${model.date}</code></li>
 <li>打包结果: <code>成功</code></li>
 <li>打包耗时: <code>${model.build_time} 秒</code></li>
-<li>下载链接: <a href="http://$ip:$port/app/package/${id}.apk" target="_blank">${id}.apk</a></li>
+<li>点击下载: <a href="http://${Weed.ip}:8080/${model.fid}" target="_blank"> 点我! </a></li>
 <li>版本信息: </li>
 </ul>
 <ul>
