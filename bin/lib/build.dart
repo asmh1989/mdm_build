@@ -19,7 +19,6 @@ import 'model/config_model.dart';
 import 'params/build_params.dart';
 import 'redis.dart';
 import 'utils.dart';
-import 'weed.dart';
 
 DateTime _lastBuildTime = DateTime.now();
 const String channel = 'build_work';
