@@ -50,7 +50,13 @@ void _clearCache() async {
         /// 大于三天就开始清理编译目录
         if (stat.modified.difference(DateTime.now()).inDays.abs() > 3) {
           Utils.log('清理缓存... ${file.path}, ${stat.modified.toIso8601String()}');
-          file.deleteSync(recursive: true);
+          try {
+            if (file.existsSync()) {
+              file.deleteSync(recursive: true);
+            }
+          } catch (e) {
+            Utils.log('ignore execption ${e}');
+          }
           break;
         }
       }
