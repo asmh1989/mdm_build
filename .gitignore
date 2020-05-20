@@ -7,6 +7,9 @@ pubspec.lock
 # Conventional directory for build outputs
 build/
 
+bmdm
+ZKM*
+
 # Directory created by dartdoc
 doc/api/
 /.idea/
