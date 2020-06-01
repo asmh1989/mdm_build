@@ -132,7 +132,34 @@ class Utils {
     return json.encode({'ok': res}, toEncodable: myEncode);
   }
 
+  static Map<String, dynamic> queryResult(BuildModel model) {
+    return {
+      'status': model.status.code,
+      'msg': model.status.code == BuildStatus.failed.code
+          ? BuildStatus.failed.msg
+          : model.status.msg,
+      'detail': model.status.msg,
+      'downloadPath': model.status.code == BuildStatus.success.code
+          ? '/app/package/${model.build_id}.apk'
+          : ''
+    };
+  }
+
   static void mail({BuildModel model, String mail}) async {
+    var url = model.params.responseUrl;
+    if (url.isNotEmpty && RegexUtil.isURL(url)) {
+      try {
+        var res = await _dio.post(url, data: ok(queryResult(model)));
+        if (res.data != null) {
+          log('回传成功');
+        } else {
+          throw '${res.statusMessage}';
+        }
+      } catch (e) {
+        log('回传失败... $e');
+      }
+    }
+
     if (mail.isEmpty || !RegexUtil.isEmail(mail)) {
       if (mail.isNotEmpty) {
         log('$mail 邮箱不正确');

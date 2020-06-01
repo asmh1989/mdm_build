@@ -152,6 +152,9 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
         var id = body['id'];
         var apk = Utils.packagePath(id) + '.apk';
         return ok(Utils.ok({'fid': await Weed.upload(apk)}));
+      } else if (request.url.path == 'test/post') {
+        Utils.log('body : ${json.encode(body)}');
+        return ok(Utils.ok({'msg': 'success'}));
       }
     } catch (e) {
       Utils.log(e.toString());

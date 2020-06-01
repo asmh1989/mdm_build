@@ -114,16 +114,7 @@ class Build {
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
       var model = BuildModel.fromJson(data);
-      return {
-        'status': model.status.code,
-        'msg': model.status.code == BuildStatus.failed.code
-            ? BuildStatus.failed.msg
-            : model.status.msg,
-        'detail': model.status.msg,
-        'downloadPath': model.status.code == BuildStatus.success.code
-            ? '/app/package/${model.build_id}.apk'
-            : ''
-      };
+      return Utils.queryResult(model);
     } else {
       return {
         'status': BuildStatus.illegal.code,

@@ -5,8 +5,9 @@ class BuildParams {
   Version version;
   Configs configs;
   String email;
+  String responseUrl;
 
-  BuildParams({this.version, this.configs, this.email});
+  BuildParams({this.version, this.configs, this.email, this.responseUrl});
 
   BuildParams.fromJson(Map<String, dynamic> json) {
     version =
@@ -16,6 +17,7 @@ class BuildParams {
         : Configs.fromJson({});
 
     email = json['email'] ?? '';
+    responseUrl = json['responseUrl'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -30,6 +32,11 @@ class BuildParams {
     if (email.isNotEmpty) {
       data['email'] = email;
     }
+
+    if (responseUrl.isNotEmpty) {
+      data['responseUrl'] = responseUrl;
+    }
+
     return data;
   }
 }
