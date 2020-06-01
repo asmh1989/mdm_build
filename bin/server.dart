@@ -10,6 +10,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'lib/build.dart';
 import 'lib/db.dart';
 import 'lib/download.dart';
+import 'lib/logger.dart';
 import 'lib/params/build_params.dart';
 import 'lib/redis.dart';
 import 'lib/utils.dart';
@@ -57,7 +58,7 @@ void main(List<String> args) async {
 
   if (Utils.isManager) {
     var handler = const shelf.Pipeline()
-        .addMiddleware(shelf.logRequests())
+        .addMiddleware(logRequests())
         .addHandler(_echoRequest);
 
     var server = await io.serve(handler, '0.0.0.0', Utils.port);
