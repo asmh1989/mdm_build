@@ -151,12 +151,12 @@ class Utils {
       try {
         var res = await _dio.post(url, data: ok(queryResult(model)));
         if (res.data != null) {
-          log('回传成功');
+          log('${model.build_id} 回传成功... ${res.data}');
         } else {
           throw '${res.statusMessage}';
         }
       } catch (e) {
-        log('回传失败... $e');
+        log('${model.build_id}  回传失败... $e');
       }
     }
 
