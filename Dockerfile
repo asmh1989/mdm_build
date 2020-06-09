@@ -24,4 +24,4 @@ ADD pubspec.* /app/
 RUN pub get
 ADD . /app
 
-ENTRYPOINT ["/usr/bin/dart", "server.dart"]
+ENTRYPOINT ["/usr/bin/dart", "bin/server.dart"]
