@@ -248,7 +248,8 @@ class Build {
         await DBManager.findOne(Constant.tableBuild, where.eq(propBuildId, id));
     if (data != null) {
       var model = BuildModel.fromJson(data);
-      _build(model);
+      // 推送消息
+      await Redis.publish(channel, model.build_id);
       return true;
     } else {
       return false;
