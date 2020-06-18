@@ -118,7 +118,7 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
       return ok(Utils.ok({'data': await Build.getCount(status)}));
     } else if (request.url.path.startsWith('app/query/')) {
       var data = await Build.getBuild(request.url.pathSegments.last);
-      return ok(json.encode(data ?? {}));
+      return ok(Utils.ok(data ?? {}));
     } else if (request.url.path.startsWith('app/package/')) {
       return await downloadStaticFile(request);
     } else if (request.url.path.startsWith('app/rebuild/')) {
