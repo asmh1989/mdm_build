@@ -149,7 +149,7 @@ class Utils {
     var url = model.params.responseUrl;
     if (url.isNotEmpty && RegexUtil.isURL(url)) {
       try {
-        var res = await _dio.post(url, data: ok(queryResult(model)));
+        var res = await _dio.post(url, data: queryResult(model));
         if (res.data != null) {
           log('${model.build_id} 回传成功... ${res.data}');
         } else {
