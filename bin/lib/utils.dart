@@ -242,11 +242,18 @@ class Utils {
       ..subject = title
       ..html = content;
 
-    try {
-      await send(message, server);
-      Utils.log('Message sent: $mail');
-    } on MailerException catch (e) {
-      Utils.log('Message not sent. $e');
+    var max_times = 5;
+    var i = 0;
+    while (i++ < max_times) {
+      try {
+        await send(message, server);
+        Utils.log('Message sent: $mail');
+        return;
+      } on MailerException catch (e) {
+        Utils.log('Message not sent. $e,  times = $i');
+        await close();
+        await Future.delayed(Duration(seconds: 8));
+      }
     }
   }
 
