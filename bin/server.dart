@@ -23,6 +23,7 @@ void main(List<String> args) async {
     ..addFlag('disableWeed', defaultsTo: false)
     ..addFlag('manager', abbr: 'm', defaultsTo: false)
     ..addOption('port', abbr: 'p', defaultsTo: '7002')
+    ..addOption('mail', abbr: 'e', defaultsTo: '')
     ..addOption('ip', abbr: 'i', defaultsTo: Platform.localHostname)
     ..addOption('sql', abbr: 's', defaultsTo: '192.168.10.64:27017');
 
@@ -40,6 +41,13 @@ void main(List<String> args) async {
   Utils.isManager = result['manager'];
   Utils.disableWeed = result['disableWeed'];
   Utils.disableManagerBuild = result['disableManagerBuild'];
+
+  String mail = result['mail'] ?? '';
+
+  if (RegexUtil.isEmail(mail)) {
+    Utils.testMail(mail);
+    return;
+  }
 
   /// 数据库连接
   DBManager.connect(address: sql);

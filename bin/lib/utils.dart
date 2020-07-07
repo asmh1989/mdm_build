@@ -222,6 +222,10 @@ class Utils {
     _sendMail(content, title, mail);
   }
 
+  static void testMail(String mail) {
+    _sendMail('test', 'test from build  server from ${ip}', mail);
+  }
+
   static void _sendMail(String content, String title, String mail) async {
     var username = 'androidbuild@justsafe.com';
     var password = 'Justsy123';

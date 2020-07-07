@@ -159,7 +159,7 @@ class MDM4Framework implements BaseFramework {
         attrs['android:icon'] = '@drawable/auto_build_icon';
       }
 
-      var doc = parse(await file.readAsString());
+      var doc = XmlDocument.parse(await file.readAsString());
 
       var update = UpdateAndroidManifest(
               meta: meta,

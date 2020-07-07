@@ -50,7 +50,7 @@ class MDM42Framework extends MDM4Framework {
 
       attrs['android:name'] = 'com.justsy.mdm.JustyApplication';
 
-      var doc = parse(await file.readAsString());
+      var doc = XmlDocument.parse(await file.readAsString());
 
       var applicationName = 'unknown';
 

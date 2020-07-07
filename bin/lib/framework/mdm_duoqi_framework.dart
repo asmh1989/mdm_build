@@ -52,7 +52,7 @@ class MDMDuoQiFramework extends MDM4Framework {
 
       attrs['android:name'] = 'com.duoqi.mdm.DuoqiApplication';
 
-      var doc = parse(await file.readAsString());
+      var doc = XmlDocument.parse(await file.readAsString());
 
       var applicationName = 'unknown';
 
