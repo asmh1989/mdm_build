@@ -251,7 +251,6 @@ class Utils {
         return;
       } on MailerException catch (e) {
         Utils.log('Message not sent. $e,  times = $i');
-        await close();
         await Future.delayed(Duration(seconds: 8));
       }
     }
