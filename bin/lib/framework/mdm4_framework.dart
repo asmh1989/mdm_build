@@ -252,6 +252,8 @@ class MDM4Framework implements BaseFramework {
 
     var shell = Shell2(workDir: source);
     Utils.log('-----------------${model.build_id} 开始打包---------------------');
+    Utils.log('-----------------${logPath}--------------------');
+
     ProcessResult result =
         await shell.run('chmod a+x gradlew && ./gradlew clean > $logPath');
 

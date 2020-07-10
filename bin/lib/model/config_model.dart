@@ -31,15 +31,29 @@ class ConfigModel {
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
     max_build = json[propMaxBuild] ?? 3;
-    android_home = json[propAndroidHome] ?? '${Utils.HOME}/Android/Sdk';
-    java_home = json[propJavaHome] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
-    zkm_jar = json[propZkmJar] ?? '${Utils.HOME}/bin/ZKM.jar';
-    var dir = Directory('${Utils.HOME}/data/.mdm_build');
+    var dir = Directory('/opt/android/sdk');
+    if (dir.existsSync()) {
+      android_home = dir.path;
+    } else {
+      android_home = json[propAndroidHome] ?? '${Utils.HOME}/Android/Sdk';
+    }
+
+    dir = Directory('/usr/local/openjdk-8');
+
+    if (dir.existsSync()) {
+      java_home = dir.path;
+    } else {
+      java_home = json[propJavaHome] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
+    }
+
+    dir = Directory('${Utils.HOME}/data/.mdm_build');
     if (dir.existsSync()) {
       cache_home = dir.path;
     } else {
       cache_home = json[propCacheHome] ?? '${Utils.HOME}/.mdm_build';
     }
+
+    zkm_jar = json[propZkmJar] ?? '${Utils.HOME}/bin/ZKM.jar';
 
     white_ips = json[propWhiteIps] ?? [];
   }

@@ -67,7 +67,6 @@ void _doTimerWork() async {
   if (DateTime.now().difference(_lastBuildTime).inMinutes.abs() < 3) {
     Utils.log('定时到, 开始查询 任务总数: ${await DBManager.count(Constant.tableBuild)}');
   }
-  await Build.initConfig();
   await _clearCache();
 
   /// 主服务下管理编译异常的服务

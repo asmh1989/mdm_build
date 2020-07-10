@@ -147,8 +147,6 @@ FutureOr<shelf.Response> _echoRequest(shelf.Request request) async {
 
 //        Utils.log('body : ${json.encode(params.toJson())}');
         return ok(Utils.ok({'id': key}));
-      } else if (request.url.path == 'config/sun') {
-        return ok(Utils.ok({'env': await Build.initConfig(body)}));
       } else if (request.url.path == 'test/email') {
         var id = body['id'];
         var email = body['email'];
