@@ -34,7 +34,13 @@ class ConfigModel {
     android_home = json[propAndroidHome] ?? '${Utils.HOME}/Android/Sdk';
     java_home = json[propJavaHome] ?? '/usr/lib/jvm/java-8-openjdk-amd64';
     zkm_jar = json[propZkmJar] ?? '${Utils.HOME}/bin/ZKM.jar';
-    cache_home = json[propCacheHome] ?? '${Utils.HOME}/.mdm_build';
+    var dir = Directory('${Utils.HOME}/data/.mdm_build');
+    if (dir.existsSync()) {
+      cache_home = dir.path;
+    } else {
+      cache_home = json[propCacheHome] ?? '${Utils.HOME}/.mdm_build';
+    }
+
     white_ips = json[propWhiteIps] ?? [];
   }
 
