@@ -270,8 +270,14 @@ class MDM4Framework implements BaseFramework {
     Utils.log('-----------------${model.build_id} 打包结束---------------------');
 
     if (result.exitCode != 0) {
-      Utils.log(result.stderr);
-      throw '编译失败, ${result.stderr}';
+      var error = '${result.stderr}';
+      if (error.isEmpty) {
+        result = await shell.run('cat $logPath');
+        error = '${result.stdout}';
+      }
+      Utils.log(error);
+
+      throw '编译失败, ${error}';
     }
   }
 
