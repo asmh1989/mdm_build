@@ -34,6 +34,10 @@ class Normal45Framework extends NormalFramework {
     await shell
         .run('sed -i "s/\'\:developer_debug\',//g" $source/settings.gradle');
     await shell.run('sed -i -e "/:developer_debug/d" $source/app/build.gradle');
+
+    /// 删除core_update 模块中的meta-data 配置
+    await shell.run(
+        'sed -i "/<meta-data/,/\\/>/d" $source/core_update/src/main/AndroidManifest.xml');
   }
 
   @override
