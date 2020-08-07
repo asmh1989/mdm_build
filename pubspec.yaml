@@ -17,7 +17,7 @@ dependencies:
   dio: ^3.0.9
   image: ^2.1.14
   shell: 1.0.1
-  xml: ^4.2.0
+  xml: ^4.3.0
   mime: ^0.9.6
   mailer: ^3.0.4
   dartis: ^0.5.0
