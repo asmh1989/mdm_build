@@ -108,7 +108,19 @@ class MDM4Framework implements BaseFramework {
         return;
       }
 
-      model.status = BuildStatus.newFailed(e.toString());
+      var logPath = Utils.logPath(model.build_id);
+
+      if (File(logPath).existsSync()) {
+        var fid = await Weed.upload(Utils.logPath(model.build_id),
+            fileName: '${model.build_id}.txt');
+
+        var error = '${e.toString()}\n  日志文件: ${Weed.getUploadUrl(fid)}';
+
+        model.status = BuildStatus.newFailed(error);
+      } else {
+        model.status = BuildStatus.newFailed(e.toString());
+      }
+
       await DBManager.save(Constant.tableBuild,
           id: propBuildId, data: model.toJson());
 
@@ -260,24 +272,18 @@ class MDM4Framework implements BaseFramework {
     var channel = model.params.version.channel;
     if (channel.isNotEmpty) {
       var command =
-          './gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release --no-daemon >> $logPath';
+          './gradlew assemble${channel[0].toUpperCase()}${channel.substring(1)}Release --no-daemon > $logPath';
       result = await shell.run(command);
     } else {
       result =
-          await shell.run('./gradlew assembleRelease --no-daemon >> $logPath');
+          await shell.run('./gradlew assembleRelease --no-daemon > $logPath');
     }
 
     Utils.log('-----------------${model.build_id} 打包结束---------------------');
 
     if (result.exitCode != 0) {
-      var error = '${result.stderr}';
-      if (error.isEmpty) {
-        result = await shell.run('cat $logPath');
-        error = '${result.stdout}';
-      }
-      Utils.log(error);
-
-      throw '编译失败, ${error}';
+      await shell.run('echo "${result.stderr}" >> $logPath');
+      throw '编译失败, ${result.stderr}';
     }
   }
 

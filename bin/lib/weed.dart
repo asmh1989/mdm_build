@@ -35,4 +35,8 @@ class Weed {
       throw '获取fid失败 : ${res.statusMessage}';
     }
   }
+
+  static String getUploadUrl(String fid) {
+    return 'http://android.justsafe.com:8080/$fid';
+  }
 }
